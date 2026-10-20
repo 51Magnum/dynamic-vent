@@ -1,81 +1,198 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import Lightbox from "yet-another-react-lightbox";
-import "yet-another-react-lightbox/styles.css";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
+import "yet-another-react-lightbox/styles.css";
 
-function Home() {
-  const [index, setIndex] = useState(-1); // Controls lightbox visibility
+const galleryImage = (number) =>
+  number <= 4 ? `/gallery${number}-retouched.png` : `/gallery${number}.jpg`;
 
+export default function Home() {
+  const [index, setIndex] = useState(-1);
   return (
-    <div className="text-white bg-gradient-to-b from-gray-900 to-gray-800">
-      {/* Hero */}
-      <section className="text-center py-20 px-6">
-        <h1 className="text-5xl font-extrabold mb-4">Smart Vents for Hardwood Floors</h1>
-        <p className="text-lg max-w-2xl mx-auto text-gray-300 mb-6">
-          DynamicVent gives your floors a flush, stylish finish — with customizable vents that elevate airflow and design.
-        </p>
-        <a href="/shop" className="bg-blue-600 hover:bg-blue-700 px-8 py-3 rounded-full font-semibold shadow-md">
-          Shop Vents
-        </a>
-      </section>
-
-      {/* What Is It */}
-      <section className="max-w-4xl mx-auto py-16 px-6 text-center">
-        <h2 className="text-3xl font-bold mb-4">Why DynamicVent?</h2>
-        <p className="text-gray-300">
-          DynamicVent transforms the look and feel of your home by replacing outdated, builder-grade vents with sleek, flush-mount floor registers. Available in a range of designer styles — or fully customizable with your own patterns or wording — our vents bring precision airflow and polished aesthetics to any hardwood floor. Installation is easy: use our included template, cut the opening with a router, and drop your new vent in place. No screws. No compromises.
-        </p>
-      </section>
-
-      {/* How It Works */}
-      <section className="bg-gray-700 py-16 px-6">
-        <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-10 text-center text-gray-100">
-          <div>
-            <img src="/template.png" alt="template" className="h-28 mx-auto mb-4" />
-            <h3 className="font-semibold text-lg">Step 1: Use Our Templates</h3>
-            <p>Place our template on your hardwood floor to mark the cutout.</p>
+    <>
+      <section className="hero container">
+        <div className="hero-copy">
+          <p className="eyebrow">THE DETAIL THAT MAKES THE DIFFERENCE</p>
+          <h1>
+            Beautiful floors.
+            <br />
+            Every <em>last detail.</em>
+          </h1>
+          <p className="hero-description">
+            Meet the floor vent that belongs in your space. Precision-cut
+            aluminum, distinctive patterns, and a flush fit that lets your floor
+            take the lead.
+          </p>
+          <div className="button-row">
+            <Link className="button" to="/shop">
+              Find your finish <span aria-hidden="true">↗</span>
+            </Link>
+            <Link className="text-link" to="/how-it-works">
+              See how it works <span aria-hidden="true">→</span>
+            </Link>
           </div>
-          <div>
-            <img src="/router.png" alt="router" className="h-28 mx-auto mb-4" />
-            <h3 className="font-semibold text-lg">Step 2: Cut with a Router</h3>
-            <p>Follow the guide and make a clean flush-mount opening.</p>
+          <div className="hero-footnote">
+            <span className="small-mark" aria-hidden="true">
+              {"///"}
+            </span>{" "}
+            Designed for hardwood. Made to blend in.
           </div>
-          <div>
-            <img src="/vent.png" alt="vent" className="h-28 mx-auto mb-4" />
-            <h3 className="font-semibold text-lg">Step 3: Drop In the Vent</h3>
-            <p>Drop it in place — that’s it! No screws or adhesive needed.</p>
+        </div>
+        <div className="hero-image">
+          <img
+            src={galleryImage(1)}
+            alt="A precision-cut DynamicVent sitting flush in a herringbone wood floor"
+            fetchPriority="high"
+          />
+          <div className="image-caption">
+            <span>THE FLUSH-MOUNT COLLECTION</span>
+            <span>01 / DynamicVent</span>
           </div>
         </div>
       </section>
-
-      {/* Gallery */}
-      <section className="max-w-5xl mx-auto py-16 px-6">
-        <h2 className="text-3xl font-bold text-center text-white mb-10">Example of Vent Styles</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-8">
-          {[...Array(15)].map((_, i) => (
-            <img
-              key={i}
-              src={`/gallery${i + 1}.jpg`}
-              alt={`Gallery ${i + 1}`}
-              className="rounded-lg shadow-md cursor-pointer"
-              loading="lazy"
-              onClick={() => setIndex(i)}
-            />
+      <div className="feature-strip">
+        <div className="container">
+          <span>Precision-cut aluminum</span>
+          <span>7 standard sizes</span>
+          <span>6 considered finishes</span>
+          <span>Optional airflow control</span>
+        </div>
+      </div>
+      <section className="container section intro-section">
+        <p className="eyebrow">SMALL DETAIL. BIG DIFFERENCE.</p>
+        <div className="intro-grid">
+          <h2>
+            Your floor has a style.
+            <br />
+            Your vent should too.
+          </h2>
+          <p>
+            Replace the raised, everyday register with something more
+            considered. DynamicVent sits flush with your wood floor, bringing
+            clean lines and a finish that feels intentional.
+          </p>
+        </div>
+      </section>
+      <section className="container collection-section">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">MAKE IT YOURS</p>
+            <h2>A pattern for your perspective.</h2>
+          </div>
+          <Link className="text-link" to="/shop">
+            Explore all designs →
+          </Link>
+        </div>
+        <div className="design-grid">
+          {[
+            {
+              image: 1,
+              title: "A little geometry.",
+              text: "Clean shapes. A distinctly modern finish.",
+            },
+            {
+              image: 2,
+              title: "Room for character.",
+              text: "A detail that makes the space your own.",
+            },
+            {
+              image: 3,
+              title: "Made to fit in.",
+              text: "A flush profile that works with your floor.",
+            },
+          ].map((item) => (
+            <Link className="design-card" to="/shop" key={item.image}>
+              <div className="design-image">
+                <img
+                  src={galleryImage(item.image)}
+                  alt={`Installed DynamicVent floor vent, design example ${item.image}`}
+                  loading="lazy"
+                />
+                <span aria-hidden="true">↗</span>
+              </div>
+              <h3>{item.title}</h3>
+              <p>{item.text}</p>
+            </Link>
           ))}
         </div>
-
+      </section>
+      <section className="installation-feature">
+        <div className="container installation-grid">
+          <div className="installation-photo">
+            <img
+              src="/step4-drop.jpg"
+              alt="Placing the vent into its prepared opening"
+              loading="lazy"
+            />
+          </div>
+          <div>
+            <p className="eyebrow">A SEAMLESS FIT STARTS HERE</p>
+            <h2>
+              A thoughtful system.
+              <br />A cleaner finish.
+            </h2>
+            <p>
+              Align the template, route the recess, and drop in your vent.
+              Explore the installation process and find the right tools for your
+              project.
+            </p>
+            <Link className="button button-light" to="/how-it-works">
+              Explore installation <span aria-hidden="true">→</span>
+            </Link>
+          </div>
+        </div>
+      </section>
+      <section className="container section">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">THE DETAILS, IN REAL LIFE</p>
+            <h2>See it in place.</h2>
+          </div>
+          <p>
+            Real floors. Real possibilities.
+            <br />
+            Select a photo for a closer look.
+          </p>
+        </div>
+        <div className="gallery-grid">
+          {Array.from({ length: 15 }, (_, i) => (
+            <button
+              key={i}
+              className="gallery-button"
+              aria-label={`Enlarge installed vent photo ${i + 1}`}
+              onClick={() => setIndex(i)}
+            >
+              <img
+                src={galleryImage(i + 1)}
+                alt={`DynamicVent installed in wood flooring, example ${i + 1}`}
+                loading="lazy"
+              />
+              <span aria-hidden="true">+</span>
+            </button>
+          ))}
+        </div>
         <Lightbox
           open={index >= 0}
           index={index}
           close={() => setIndex(-1)}
-          slides={[...Array(15)].map((_, i) => ({
-            src: `/gallery${i + 1}.jpg`,
+          slides={Array.from({ length: 15 }, (_, i) => ({
+            src: galleryImage(i + 1),
+            alt: `Installed DynamicVent example ${i + 1}`,
           }))}
           plugins={[Zoom]}
         />
       </section>
-    </div>
+      <section className="project-cta">
+        <div className="container">
+          <p className="eyebrow">YOUR NEXT FINISHING TOUCH</p>
+          <h2>Bring the whole room together.</h2>
+          <p>Choose your size, find your pattern, and make it yours.</p>
+          <Link className="button" to="/shop">
+            Design your DynamicVent ↗
+          </Link>
+        </div>
+      </section>
+    </>
   );
 }
-
-export default Home;

@@ -1,67 +1,68 @@
-function HowItWorks() {
+import { Link } from "react-router-dom";
+const steps = [
+  [
+    "step1-align.jpg",
+    "Align the template",
+    "Position the full routing template over the duct opening using the inner visual guide.",
+  ],
+  [
+    "step2-remove.jpg",
+    "Remove the inner guide",
+    "With the outer frame secured in place, remove the inner visual insert.",
+  ],
+  [
+    "step3-route.jpg",
+    "Route the recess",
+    "Follow the routing frame to prepare the opening for a flush fit.",
+  ],
+  [
+    "step4-drop.jpg",
+    "Drop in your vent",
+    "Set your vent into the prepared opening for a clean finish without visible screws.",
+  ],
+];
+export default function HowItWorks() {
   return (
-    <div className="bg-gray-100 text-gray-800 py-16 px-6">
-      <div className="max-w-4xl mx-auto text-center">
-        <h1 className="text-4xl font-bold mb-6">How It Works</h1>
-        <p className="text-lg mb-8">
-          Installing DynamicVent is fast and clean. Just follow these three steps and enjoy a beautiful flush-mount result that elevates your entire floor.
+    <div className="container section">
+      <div className="page-intro">
+        <p className="eyebrow">FROM FIRST CUT TO FINAL DETAIL</p>
+        <h1>A fit worth finishing.</h1>
+        <p>
+          Our template system guides the installation, helping you create a
+          clean recess for your DynamicVent. Watch the process, then explore
+          each step.
         </p>
-
-        {/* Video Embed */}
-        <div className="mb-10" style={{ height: "500px" }}>
-          <iframe
-            src="https://www.youtube.com/embed/0Ic_XOCtcm4?rel=0"
-            title="How to Install DynamicVent"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            className="w-full h-full rounded shadow-lg"
-          ></iframe>
-        </div>
-
-        <h2 className="text-2xl font-semibold mb-4">3 Simple Steps</h2>
-<div className="grid md:grid-cols-4 gap-10 text-left mt-10">
-  {/* Step 1 */}
-  <div className="flex flex-col items-center text-center">
-    <img src="/step1-align.jpg" alt="Align Template" className="h-24 mb-4" />
-    <h3 className="font-bold text-xl mb-2">1. Align the Template</h3>
-    <p className="text-gray-700">
-      Place the full routing template on your floor and use the inner visual guide to precisely align it over the vent opening.
-    </p>
-  </div>
-
-  {/* Step 2 */}
-  <div className="flex flex-col items-center text-center">
-    <img src="/step2-remove.jpg" alt="Remove Guide" className="h-24 mb-4" />
-    <h3 className="font-bold text-xl mb-2">2. Remove the Inner Guide</h3>
-    <p className="text-gray-700">
-      Once positioned, remove the inner visual insert. You’ll be left with the outer routing frame taped in place.
-    </p>
-  </div>
-
-  {/* Step 3 */}
-  <div className="flex flex-col items-center text-center">
-    <img src="/step3-route.jpg" alt="Route Opening" className="h-24 mb-4" />
-    <h3 className="font-bold text-xl mb-2">3. Route the Opening</h3>
-    <p className="text-gray-700">
-      Use a router to cut out the vent cavity using the outer template as your guide.
-    </p>
-  </div>
-
-  {/* Step 4 */}
-  <div className="flex flex-col items-center text-center">
-    <img src="/step4-drop.jpg" alt="Drop In Vent" className="h-24 mb-4" />
-    <h3 className="font-bold text-xl mb-2">4. Drop It In</h3>
-    <p className="text-gray-700">
-      Set your DynamicVent into place — flush, clean, and secure without screws or adhesive.
-    </p>
-  </div>
-</div>
-
-
-
+      </div>
+      <iframe
+        className="guide-video"
+        src="https://www.youtube.com/embed/0Ic_XOCtcm4?rel=0"
+        title="How to install DynamicVent"
+        loading="lazy"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+      />
+      <div className="guide-steps">
+        {steps.map(([image, title, text], i) => (
+          <article key={image}>
+            <img src={`/${image}`} alt={title} loading="lazy" />
+            <p className="eyebrow">STEP 0{i + 1}</p>
+            <h2>{title}</h2>
+            <p>{text}</p>
+          </article>
+        ))}
+      </div>
+      <div className="guide-note">
+        Before routing, confirm your floor’s compatibility, available thickness,
+        and installation dimensions. A router is required.{" "}
+        <Link className="text-link" to="/contact">
+          Talk through your project with us →
+        </Link>
+      </div>
+      <div className="button-row">
+        <Link to="/shop" className="button">
+          Explore vents & installation kits ↗
+        </Link>
       </div>
     </div>
   );
 }
-
-export default HowItWorks;

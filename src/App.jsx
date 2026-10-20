@@ -1,73 +1,111 @@
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import Home from './pages/Home';
-import HowItWorks from './pages/HowItWorks';
-import Shop from './pages/Shop';
-import FAQ from './pages/FAQ';
-import Contact from './pages/Contact';
-import { useState } from 'react';
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  NavLink,
+  Link,
+  useLocation,
+} from "react-router-dom";
+import { useEffect, useState } from "react";
+import Home from "./pages/Home";
+import HowItWorks from "./pages/HowItWorks";
+import Shop from "./pages/Shop";
+import FAQ from "./pages/FAQ";
+import Contact from "./pages/Contact";
 
-function App() {
-	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+function Layout() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const { pathname } = useLocation();
+  useEffect(() => {
+    setMenuOpen(false);
+    window.scrollTo(0, 0);
+  }, [pathname]);
   return (
-    <Router>
-      <div className="min-h-screen bg-white text-gray-800">
-		<header className="bg-gray-900 text-white p-4 shadow-md">
-		  <div className="max-w-6xl mx-auto flex justify-between items-center">
-			<div className="flex items-center space-x-3">
-			  <img src="/logo.png" alt="DynamicVent logo" className="h-10 w-auto" />
-			  <h1 className="text-xl font-bold">DynamicVent</h1>
-			</div>
-
-			{/* Hamburger Button - shown on mobile */}
-			<button
-			  className="sm:hidden text-white focus:outline-none"
-			  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-			>
-			  <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-				<path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-			  </svg>
-			</button>
-
-			{/* Desktop Menu */}
-			<nav className="hidden sm:flex space-x-4">
-			  <Link to="/">Home</Link>
-			  <Link to="/how-it-works">How It Works</Link>
-			  <Link to="/shop">Shop</Link>
-			  <Link to="/faq">FAQ</Link>
-			  <Link to="/contact">Contact</Link>
-			</nav>
-		  </div>
-
-		  {/* Mobile Menu */}
-		  {isMobileMenuOpen && (
-			<div className="sm:hidden mt-2 flex flex-col space-y-2 px-4">
-			  <Link to="/" onClick={() => setIsMobileMenuOpen(false)}>Home</Link>
-			  <Link to="/how-it-works" onClick={() => setIsMobileMenuOpen(false)}>How It Works</Link>
-			  <Link to="/shop" onClick={() => setIsMobileMenuOpen(false)}>Shop</Link>
-			  <Link to="/faq" onClick={() => setIsMobileMenuOpen(false)}>FAQ</Link>
-			  <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)}>Contact</Link>
-			</div>
-		  )}
-		</header>
-
-
-
-        <main className="max-w-6xl mx-auto py-10 px-4">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/how-it-works" element={<HowItWorks />} />
-            <Route path="/shop" element={<Shop />} />
-            <Route path="/faq" element={<FAQ />} />
-            <Route path="/contact" element={<Contact />} />
-          </Routes>
-        </main>
-
-        <footer className="bg-gray-100 text-center py-6 text-sm text-gray-600">
-          &copy; {new Date().getFullYear()} DynamicVent. All rights reserved.
-        </footer>
-      </div>
-    </Router>
+    <>
+      <a className="skip-link" href="#main">
+        Skip to content
+      </a>
+      <div className="announcement">Thoughtful design. A seamless finish.</div>
+      <header className="site-header">
+        <div className="container header-inner">
+          <Link to="/" className="brand" aria-label="DynamicVent home">
+            <img
+              src="/dynamicvent-logo.svg"
+              alt="DynamicVent — A finer finish for your floor"
+            />
+          </Link>
+          <button
+            className="menu-toggle"
+            type="button"
+            aria-expanded={menuOpen}
+            aria-controls="navigation"
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            {menuOpen ? "Close ✕" : "Menu ☰"}
+          </button>
+          <nav
+            id="navigation"
+            className={menuOpen ? "navigation is-open" : "navigation"}
+            aria-label="Main navigation"
+          >
+            <NavLink to="/" end>
+              Home
+            </NavLink>
+            <NavLink to="/how-it-works">Installation</NavLink>
+            <NavLink to="/faq">FAQ</NavLink>
+            <NavLink to="/contact">Contact</NavLink>
+            <NavLink className="nav-cta" to="/shop">
+              Design your vent <span aria-hidden="true">↗</span>
+            </NavLink>
+          </nav>
+        </div>
+      </header>
+      <main id="main" tabIndex="-1">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/how-it-works" element={<HowItWorks />} />
+          <Route path="/shop" element={<Shop />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route
+            path="*"
+            element={
+              <div className="container section">
+                <h1>Let’s find your way.</h1>
+                <Link className="button" to="/">
+                  Back to home
+                </Link>
+              </div>
+            }
+          />
+        </Routes>
+      </main>
+      <footer className="site-footer">
+        <div className="container footer-top">
+          <div>
+            <Link className="footer-brand" to="/">
+              Dynamic<span>Vent</span>
+            </Link>
+            <p>The finishing touch your floor deserves.</p>
+          </div>
+          <div className="footer-links">
+            <Link to="/shop">Explore designs</Link>
+            <Link to="/how-it-works">Installation guide</Link>
+            <Link to="/contact">Get in touch</Link>
+          </div>
+        </div>
+        <div className="container footer-bottom">
+          <span>© {new Date().getFullYear()} DynamicVent</span>
+          <span>Flush-mount vents. Considered in every detail.</span>
+        </div>
+      </footer>
+    </>
   );
 }
-
-export default App;
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Layout />
+    </BrowserRouter>
+  );
+}
