@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import InquiryForm from "./InquiryForm";
-import quoteConfirmation from "../data/quote-confirmation.json";
+import { quoteConfirmation } from "../data/confirmation";
 beforeEach(() => {
   sessionStorage.clear();
   global.fetch = jest.fn();
@@ -134,5 +134,55 @@ test("trade pricing separates unit price from quantity total and offers one fini
   expect(screen.queryByLabelText("Finish type")).not.toBeInTheDocument();
   expect(screen.getByLabelText("Finish", { exact: true })).toHaveValue(
     "Not decided",
+  );
+});
+
+test("confirmation copy appears only when the server confirms delivery", async () => {
+  global.fetch.mockResolvedValue({
+    ok: true,
+    json: async () => ({ internalSent: true, confirmationSent: true }),
+  });
+  render(<InquiryForm initialMessage="Quote please" inquiryType="quote" />);
+  identity();
+  fireEvent.click(screen.getByRole("button", { name: /Send quote request/ }));
+  expect(
+    await screen.findByText("We've emailed a copy to buyer@example.com."),
+  ).toBeInTheDocument();
+  expect(JSON.parse(global.fetch.mock.calls[0][1].body).sourcePage).toBe(
+    window.location.pathname,
+  );
+});
+test("internal-only success explains the missing confirmation", async () => {
+  global.fetch.mockResolvedValue({
+    ok: true,
+    json: async () => ({ internalSent: true, confirmationSent: false }),
+  });
+  render(<InquiryForm initialMessage="Quote please" inquiryType="quote" />);
+  identity();
+  fireEvent.click(screen.getByRole("button", { name: /Send quote request/ }));
+  expect(
+    await screen.findByText(/A confirmation email couldn't be sent/),
+  ).toBeInTheDocument();
+  expect(screen.queryByText(/We've emailed a copy/)).not.toBeInTheDocument();
+});
+test("429 preserves the form and focuses the error alert", async () => {
+  const message =
+    "Too many submissions. Please wait a few minutes or email sales@dynamicvent.com.";
+  global.fetch.mockResolvedValue({
+    ok: false,
+    status: 429,
+    json: async () => ({ message }),
+  });
+  render(<InquiryForm initialMessage="Keep my quote" inquiryType="quote" />);
+  identity();
+  fireEvent.click(screen.getByRole("button", { name: /Send quote request/ }));
+  const alert = await screen.findByRole("alert");
+  expect(alert).toHaveTextContent(message);
+  await waitFor(() => expect(alert).toHaveFocus());
+  expect(
+    screen.getByLabelText("Your configured order and questions"),
+  ).toHaveValue("Keep my quote");
+  expect(screen.getByLabelText("Email address")).toHaveValue(
+    "buyer@example.com",
   );
 });

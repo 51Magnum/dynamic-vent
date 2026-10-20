@@ -1,5 +1,5 @@
-import { useState } from "react";
-import quoteConfirmation from "../data/quote-confirmation.json";
+import { useState, useRef, useEffect } from "react";
+import { quoteConfirmation, generalConfirmation } from "../data/confirmation";
 import { sizes, colors } from "../data/options";
 import { ventPrices as retailPrices } from "../data/pricing";
 const MAX_BYTES = 2 * 1024 * 1024;
@@ -56,6 +56,10 @@ export default function InquiryForm({
   const [files, setFiles] = useState([]);
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
+  const errorRef = useRef(null);
+  useEffect(() => {
+    if (status?.type === "error") errorRef.current?.focus();
+  }, [status]);
   const [website, setWebsite] = useState("");
   const kind = trade ? "trade" : form.inquiryType || inquiryType;
   const update = (event) => {
@@ -97,6 +101,7 @@ export default function InquiryForm({
           email: form.email,
           message,
           inquiryType: kind,
+          sourcePage: window.location.pathname,
           website,
           attachments: await Promise.all(files.map(readFile)),
         }),
@@ -109,11 +114,9 @@ export default function InquiryForm({
         );
       setStatus({
         type: "success",
-        message:
-          kind === "general"
-            ? result.message ||
-              "Your inquiry was sent. We’ll reply by email with next steps."
-            : quoteConfirmation,
+        message: kind === "general" ? generalConfirmation : quoteConfirmation,
+        confirmationSent: result.confirmationSent === true,
+        internalSent: result.internalSent === true,
       });
       try {
         sessionStorage.removeItem(draftKey);
@@ -132,6 +135,14 @@ export default function InquiryForm({
         <p className="eyebrow">INQUIRY SENT</p>
         <h2>Thank you, {form.name}.</h2>
         <p>{status.message}</p>
+        {status.confirmationSent ? (
+          <p>We've emailed a copy to {form.email.trim()}.</p>
+        ) : status.internalSent ? (
+          <p>
+            We received your message. A confirmation email couldn't be sent, but
+            our team has your details.
+          </p>
+        ) : null}
         <p>
           No payment has been taken. Your order is confirmed only after you
           approve a final quote.
@@ -390,7 +401,12 @@ export default function InquiryForm({
         </p>
       </fieldset>
       {status && (
-        <p role="alert" className="contact-status error">
+        <p
+          role="alert"
+          ref={errorRef}
+          tabIndex={-1}
+          className="contact-status error"
+        >
           {status.message}{" "}
           <a href="mailto:sales@dynamicvent.com">Email us directly</a>.
         </p>

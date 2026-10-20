@@ -69,21 +69,18 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
 
-
 ## Quote requests and trade artwork
 
 The site uses a quote workflow rather than collecting payment. `/shop` passes the
 configured order to `/contact`; `/trade` collects project quantities, wording,
-and up to three PNG/JPG/PDF attachments (2 MB combined). The contact API sends
-these to `sales@dynamicvent.com`, with the customer’s address as Reply-To.
-Confirmation is shown only after SMTP accepts the message; this is not a
-mailbox-delivery guarantee. Failed submissions keep the form contents.
+and up to three PNG/JPG/PDF attachments (2 MB combined). The contact API independently attempts an internal notification and a transactional
+customer confirmation. An HTTP success means at least one was accepted by SMTP;
+it is not a mailbox-delivery guarantee. Failed submissions keep form contents.
+See the Contact pipeline section below for delivery flags and configuration.
 
-Set `EMAIL_USER` and `EMAIL_PASS` as server-only environment variables in Vercel.
-All inquiries go to `sales@dynamicvent.com`. Never use a `REACT_APP_`
-prefix for these values. `.env.example` contains names only. Local API development
-uses `node server.js`; run the frontend through `vercel dev` for same-origin API
-routing, or configure a local proxy. Do not commit real environment files.
+Local API development uses `node server.js`; run the frontend through `vercel dev`
+for same-origin API routing, or configure a local proxy. Never commit real
+environment files or use `REACT_APP_` prefixes for server secrets.
 
 Run `npm test -- --watchAll=false`, `npm run test:server`, and `npm run build`.
 The build generates a distinct HTML title, description, canonical URL, and social
@@ -106,7 +103,6 @@ The owner-approved About, Trade, and 30-day Returns & Warranty copy is published
 in the corresponding page components. Do not add a phone number. Standard vents
 are painted aluminum; powder coating is an optional upgrade priced by quote.
 
-
 ## Shop first render
 
 The build renders `/shop` using the shared React layout and shop components.
@@ -119,3 +115,71 @@ APIs, and run `npm run test:prerender` after `npm run build`.
 For a browser timing check, open `/shop?measure=1`. A buffered Paint Timing
 observer records first contentful paint in a `shop-first-contentful-paint-ms`
 meta tag. Measurement is opt-in and makes no analytics/network requests.
+
+## Contact pipeline
+
+`/api/contact` validates and trims input, drops honeypot submissions with a success
+response, applies IP limits before decoding artwork, and validates up to three
+PNG/JPG/PDF files (2 MB combined). Client IP precedence is first `x-forwarded-for`,
+then `x-real-ip`, then socket address; only a SHA-256 key is used by the limiter.
+These headers must be supplied/overwritten by the trusted hosting proxy.
+
+The customer confirmation is attempted first so the internal notification can
+include its final delivery status. Each send has its own error handling; either
+can succeed when the other fails. Only the internal notification includes artwork;
+the confirmation includes filenames and a message summary of at most 2,000
+characters, plus an ellipsis when truncated. HTML values are escaped. Both emails
+use the mailbox in `EMAIL_USER`; customer replies go to `SALES_EMAIL` (default
+`sales@dynamicvent.com`) and internal replies go to the customer. The response
+contains `ok`, `message`, `internalSent`, and `confirmationSent` if either succeeds;
+both failing produces 502. A 429 includes `Retry-After` and preserves the form.
+Honeypots return success with both flags false and send/log no lead.
+
+`src/data/reply-time.json` is the single reply-time setting used in email and UI.
+`quote-confirmation.json` contains a `{replyTime}` placeholder, expanded by the
+handler and the UI helper. Rebuild/redeploy after editing it.
+
+Environment variable names and comments are listed in `.env.example`, without
+values. Required: `EMAIL_USER`, `EMAIL_PASS` (the M365 app password when MFA is
+used). Optional: `SALES_EMAIL`, `RATE_LIMIT_MAX`, `RATE_LIMIT_WINDOW_SECONDS`,
+`UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `LEAD_WEBHOOK_URL`, and
+`LEAD_WEBHOOK_SECRET`. Set secrets only in Vercel's server environment settings.
+The default path uses the existing M365 mailbox, with no new dependency/service.
+
+The default limiter allows five IP submissions per ten minutes and three customer
+confirmations per recipient per hour. The recipient cap skips only confirmations;
+internal notifications still send. The in-memory Map is **best effort**: per warm
+function instance, reset on cold start, and unshared across concurrent instances
+or regions. Expired keys are pruned and active keys capped at 10,000 (oldest-key
+eviction fails open). For shared limits, optionally connect Upstash Redis through
+the Vercel Marketplace and set both Upstash variables. The REST INCR/EXPIRE
+pipeline uses time-bucketed keys, so retries do not extend the limit window.
+Upstash errors/timeouts fall back to local memory with a safe diagnostic event.
+The free tier is optional; no paid service is required or provisioned here.
+
+After send attempts, a single structured `lead` event records the UUID, UTC ISO
+time, source, source page, customer details, message, optional structured quote,
+attachment filenames/byte counts, and delivery flags. It never contains artwork
+content or IP. Only the `lead` event contains customer data; error events contain
+controlled diagnostics and lead IDs. Protect access to runtime logs accordingly.
+Vercel runtime logs have short retention (about one hour on Hobby and one day on
+Pro), so they are **not durable storage**. The internal email remains the primary
+record. See [Vercel's retention documentation](https://vercel.com/docs/logs/runtime).
+
+For a recommended free durable record, set `LEAD_WEBHOOK_URL` and
+`LEAD_WEBHOOK_SECRET` using [the private Google Sheet setup](docs/lead-sheet-webhook.md).
+The logger POSTs JSON with `X-Lead-Secret`; the webhook has a three-second total
+timeout and never changes email delivery or HTTP success. Leave the variables
+unset to disable it. No new dependency or cost is required, Shane can read/sort
+leads in Sheets, and sinks in `lib/lead-log.cjs` can be swapped for Redis or a CRM
+without changing the handler. The Apps Script example prevents formula injection
+and documents its special authentication requirement.
+
+Validate with `npm test -- --watchAll=false --runInBand`, `npm run test:server`,
+`npm run build && npm run test:prerender`, and
+`npm run check:secrets -- --worktree`. SMTP, webhook and Redis tests use mocks;
+they send no live messages. Before merging, use a Vercel Preview with existing
+Preview mailbox credentials for owner-authorized delivery checks. Never deliberately
+change Production credentials to test failures. Exercise general/trade submissions,
+artwork-only-on-internal, a filled honeypot, six submissions, and runtime lead
+flags. Simulate SMTP failures in unit tests, or only in an isolated Preview.

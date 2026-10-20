@@ -1,5 +1,6 @@
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
+const replyTime = require("../src/data/reply-time.json");
 const { createHandler } = require("../lib/contact-handler.cjs");
 const environment = {
   EMAIL_USER: "test@example.com",
@@ -27,14 +28,21 @@ function response() {
     },
   };
 }
-function setup(sendMail = async () => {}) {
+function setup(sendMail = async () => {}, overrides = {}) {
   let config;
   const sent = [];
+  const leads = [];
+  let closed = false;
   const handler = createHandler({
     env: environment,
+    leadLogger: async (record) => leads.push(record),
+    ...overrides,
     createTransport(options) {
       config = options;
       return {
+        close() {
+          closed = true;
+        },
         async sendMail(mail) {
           sent.push(mail);
           await sendMail(mail);
@@ -42,7 +50,7 @@ function setup(sendMail = async () => {}) {
       };
     },
   });
-  return { handler, sent, config: () => config };
+  return { handler, sent, leads, closed: () => closed, config: () => config };
 }
 test("trade quote delivers configuration and safe artwork with buyer reply-to", async () => {
   const app = setup();
@@ -63,9 +71,13 @@ test("trade quote delivers configuration and safe artwork with buyer reply-to", 
   assert.equal(res.code, 200);
   assert.equal(
     res.body.message,
-    require("../src/data/quote-confirmation.json"),
+    require("../src/data/quote-confirmation.json").replace(
+      "{replyTime}",
+      replyTime,
+    ),
   );
-  assert.equal(app.sent.length, 1);
+  assert.equal(app.sent.length, 2);
+  app.sent.reverse();
   assert.equal(app.sent[0].to, "sales@dynamicvent.com");
   assert.equal(app.sent[0].replyTo, "buyer@example.com");
   assert.match(app.sent[0].text, /12 vents/);
@@ -87,7 +99,6 @@ test("invalid identity, header injection, empty messages and bot submissions do 
     { name: "Buyer\r\nBcc: other@example.com" },
     { email: "not-email" },
     { message: "  " },
-    { website: "spam" },
     { inquiryType: "arbitrary" },
   ]) {
     const app = setup();
@@ -162,5 +173,287 @@ test("diagnostics identify disabled SMTP without logging the provider response o
     assert.equal(res.code, 502);
   } finally {
     console.error = original;
+  }
+});
+
+test("general inquiry sends an independent confirmation and records accurate lead metadata", async () => {
+  const app = setup(undefined, {
+    env: { ...environment, SALES_EMAIL: "team@example.com" },
+    now: () => new Date("2026-10-20T12:00:00Z"),
+  });
+  const res = response();
+  await app.handler(
+    {
+      method: "POST",
+      body: {
+        ...valid,
+        inquiryType: "general",
+        sourcePage: "/contact",
+        phone: " +1 (208) 555-0100 ",
+      },
+    },
+    res,
+  );
+  assert.deepEqual(
+    [res.code, res.body.ok, res.body.internalSent, res.body.confirmationSent],
+    [200, true, true, true],
+  );
+  const customer = app.sent.find((mail) => mail.to === valid.email);
+  const internal = app.sent.find((mail) => mail.to === "team@example.com");
+  assert.equal(customer.subject, "We received your DynamicVent inquiry");
+  assert.equal(customer.replyTo, "team@example.com");
+  assert.equal(customer.attachments, undefined);
+  assert.equal(internal.replyTo, valid.email);
+  assert.match(internal.text, /Customer confirmation sent: Yes/);
+  assert.match(internal.text, /2026-10-20T12:00:00.000Z/);
+  assert.ok(customer.text.includes(replyTime));
+  assert.ok(res.body.message.includes(replyTime));
+  assert.equal(app.leads.length, 1);
+  assert.equal(app.leads[0].source, "contact");
+  assert.equal(app.leads[0].phone, "+1 (208) 555-0100");
+  assert.equal(app.leads[0].internalSent, true);
+  assert.equal(app.leads[0].confirmationSent, true);
+  assert.match(internal.text, new RegExp(app.leads[0].id));
+  assert.equal(app.closed(), true);
+});
+test("confirmation truncates the submitted message, escapes HTML and lists filenames only", async () => {
+  const app = setup();
+  const res = response();
+  const message =
+    "<script>alert(1)</script> & \"hello\" 'world'\n\t" + "x".repeat(2100);
+  await app.handler(
+    {
+      method: "POST",
+      body: {
+        ...valid,
+        message,
+        attachments: [
+          {
+            name: "logo.pdf",
+            content: Buffer.from("%PDF-1.4 private artwork").toString("base64"),
+          },
+        ],
+      },
+    },
+    res,
+  );
+  const mail = app.sent.find((mail) => mail.to === valid.email);
+  assert.ok(mail.text.includes(message.slice(0, 2000) + "…"));
+  assert.ok(!mail.text.includes(message));
+  assert.match(mail.html, /&lt;script&gt;alert/);
+  assert.match(mail.html, /&amp; &quot;hello&quot; &#39;world&#39;/);
+  assert.match(mail.text, /logo.pdf/);
+  assert.doesNotMatch(mail.text, /private artwork/);
+  assert.match(mail.text, /No payment has been taken/);
+  assert.equal(mail.attachments, undefined);
+  assert.equal(app.leads[0].attachments[0].bytes, 24);
+  assert.equal(app.leads[0].attachments[0].content, undefined);
+});
+test("either send can fail without preventing the other, with safe diagnostics", async () => {
+  for (const failedRecipient of [valid.email, "sales@dynamicvent.com"]) {
+    const records = [];
+    const original = console.error;
+    console.error = (line) => records.push(JSON.parse(line));
+    try {
+      const app = setup(async (mail) => {
+        if (mail.to === failedRecipient) throw new Error("private details");
+      });
+      const res = response();
+      await app.handler({ method: "POST", body: valid }, res);
+      assert.equal(res.code, 200);
+      assert.equal(app.sent.length, 2);
+      assert.equal(
+        res.body.internalSent,
+        failedRecipient !== "sales@dynamicvent.com",
+      );
+      assert.equal(res.body.confirmationSent, failedRecipient !== valid.email);
+      assert.equal(app.leads[0].internalSent, res.body.internalSent);
+      assert.equal(app.leads[0].confirmationSent, res.body.confirmationSent);
+      assert.ok(
+        records.some(
+          (record) =>
+            record.event ===
+            (res.body.internalSent
+              ? "confirmation_send_failed"
+              : "internal_notify_failed"),
+        ),
+      );
+      assert.doesNotMatch(
+        JSON.stringify(records),
+        /private details|buyer@example.com/,
+      );
+      assert.equal(app.closed(), true);
+    } finally {
+      console.error = original;
+    }
+  }
+});
+test("honeypot returns success before validation, decoding, limiting, or SMTP", async () => {
+  const original = console.log;
+  const logs = [];
+  console.log = (line) => logs.push(JSON.parse(line));
+  try {
+    const app = setup(undefined, {
+      rateLimiter: {
+        hit() {
+          throw new Error("must not limit");
+        },
+      },
+    });
+    const res = response();
+    await app.handler(
+      { method: "POST", body: { website: "spam", attachments: "invalid" } },
+      res,
+    );
+    assert.equal(res.code, 200);
+    assert.deepEqual(
+      [res.body.ok, res.body.internalSent, res.body.confirmationSent],
+      [true, false, false],
+    );
+    assert.equal(app.sent.length, 0);
+    assert.equal(app.leads.length, 0);
+    assert.deepEqual(logs, [{ event: "spam_dropped", reason: "honeypot" }]);
+  } finally {
+    console.log = original;
+  }
+});
+test("IP limits the sixth submission, hashes trusted IP precedence, and limits recipients separately", async () => {
+  const app = setup();
+  for (let i = 0; i < 6; i++) {
+    const res = response();
+    await app.handler(
+      {
+        method: "POST",
+        headers: { "x-forwarded-for": "192.0.2.1, 192.0.2.2" },
+        body: valid,
+      },
+      res,
+    );
+    assert.equal(res.code, i === 5 ? 429 : 200);
+    if (i === 5) assert.ok(Number(res.headers["Retry-After"]) > 0);
+    if (i === 3 || i === 4) assert.equal(res.body.confirmationSent, false);
+  }
+  assert.equal(app.sent.filter((mail) => mail.to === valid.email).length, 3);
+  assert.equal(
+    app.sent.filter((mail) => mail.to === "sales@dynamicvent.com").length,
+    5,
+  );
+  const another = response();
+  await app.handler(
+    { method: "POST", headers: { "x-real-ip": "192.0.2.3" }, body: valid },
+    another,
+  );
+  assert.equal(another.code, 200);
+  assert.equal(another.body.confirmationSent, false);
+  const keys = [];
+  const capture = setup(undefined, {
+    rateLimiter: {
+      async hit(key) {
+        keys.push(key);
+        return { allowed: true };
+      },
+    },
+  });
+  await capture.handler(
+    {
+      method: "POST",
+      headers: { "x-forwarded-for": "192.0.2.1, 192.0.2.2" },
+      body: valid,
+    },
+    response(),
+  );
+  assert.match(keys[0], /^ip:[a-f0-9]{64}$/);
+  assert.equal(
+    keys[0],
+    "ip:" +
+      require("node:crypto")
+        .createHash("sha256")
+        .update("192.0.2.1")
+        .digest("hex"),
+  );
+  assert.match(keys[1], /^recipient:[a-f0-9]{64}$/);
+});
+test("validation trims strings, strips message controls, rejects bad phones and normalizes source pages", async () => {
+  const app = setup();
+  const res = response();
+  await app.handler(
+    {
+      method: "POST",
+      body: {
+        ...valid,
+        name: " Test Buyer ",
+        email: " buyer@example.com ",
+        message: "  hello\u0000\u0007\n\tworld  ",
+        sourcePage: "/arbitrary",
+      },
+    },
+    res,
+  );
+  assert.equal(res.code, 200);
+  assert.equal(app.leads[0].message, "hello\n\tworld");
+  assert.equal(app.leads[0].sourcePage, "/contact");
+  for (const phone of ["123ext", "1".repeat(31), 123]) {
+    const bad = response();
+    await setup().handler({ method: "POST", body: { ...valid, phone } }, bad);
+    assert.equal(bad.code, 400);
+  }
+  const bad = response();
+  await setup().handler(
+    { method: "POST", body: { ...valid, name: "Buyer\n" } },
+    bad,
+  );
+  assert.equal(bad.code, 400);
+});
+test("configured sales address is used in safe failure and rate-limit messages", async () => {
+  const app = setup(
+    async () => {
+      throw new Error("SMTP failed");
+    },
+    { env: { ...environment, SALES_EMAIL: "team@example.com" } },
+  );
+  const res = response();
+  await app.handler({ method: "POST", body: valid }, res);
+  assert.match(res.body.message, /team@example.com/);
+  assert.equal(app.leads.length, 1);
+});
+
+test("accepted submissions emit exactly one real lead event even when webhook fails", async () => {
+  const { createLeadLogger } = require("../lib/lead-log.cjs");
+  const originalLog = console.log;
+  const originalError = console.error;
+  const logs = [];
+  const errors = [];
+  console.log = (line) => logs.push(JSON.parse(line));
+  console.error = (line) => errors.push(JSON.parse(line));
+  try {
+    const leadLogger = createLeadLogger({
+      env: { LEAD_WEBHOOK_URL: "https://hooks.example/leads" },
+      fetchImpl: async () => {
+        throw new Error("private backend");
+      },
+    });
+    const app = setup(undefined, { leadLogger });
+    const res = response();
+    await app.handler(
+      {
+        method: "POST",
+        headers: { "x-real-ip": "192.0.2.99" },
+        body: { ...valid, sourcePage: "/trade" },
+      },
+      res,
+    );
+    assert.equal(res.code, 200);
+    assert.equal(logs.length, 1);
+    assert.equal(logs[0].event, "lead");
+    assert.equal(logs[0].sourcePage, "/trade");
+    assert.equal(logs[0].internalSent, true);
+    assert.equal(logs[0].confirmationSent, true);
+    assert.doesNotMatch(JSON.stringify(logs), /192.0.2.99|remoteAddress/);
+    assert.deepEqual(errors, [
+      { event: "lead_webhook_failed", leadId: logs[0].id },
+    ]);
+  } finally {
+    console.log = originalLog;
+    console.error = originalError;
   }
 });
