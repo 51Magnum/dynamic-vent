@@ -5,6 +5,7 @@ import {
   NavLink,
   Link,
   useLocation,
+  Navigate,
 } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Home from "./pages/Home";
@@ -12,6 +13,10 @@ import HowItWorks from "./pages/HowItWorks";
 import Shop from "./pages/Shop";
 import FAQ from "./pages/FAQ";
 import Contact from "./pages/Contact";
+import About from "./pages/About";
+import Trade from "./pages/Trade";
+import Policies from "./pages/Policies";
+import PageMetadata from "./components/PageMetadata";
 
 function Layout() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -22,6 +27,7 @@ function Layout() {
   }, [pathname]);
   return (
     <>
+      <PageMetadata />
       <a className="skip-link" href="#main">
         Skip to content
       </a>
@@ -52,6 +58,8 @@ function Layout() {
               Home
             </NavLink>
             <NavLink to="/how-it-works">Installation</NavLink>
+            <NavLink to="/about">About</NavLink>
+            <NavLink to="/trade">Trade</NavLink>
             <NavLink to="/faq">FAQ</NavLink>
             <NavLink to="/contact">Contact</NavLink>
             <NavLink className="nav-cta" to="/shop">
@@ -67,6 +75,13 @@ function Layout() {
           <Route path="/shop" element={<Shop />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/trade" element={<Trade />} />
+          <Route path="/returns-warranty" element={<Policies />} />
+          <Route
+            path="/policies"
+            element={<Navigate to="/returns-warranty" replace />}
+          />
           <Route
             path="*"
             element={
@@ -87,10 +102,17 @@ function Layout() {
               Dynamic<span>Vent</span>
             </Link>
             <p>The finishing touch your floor deserves.</p>
+            <p>
+              Designed in Nampa, Idaho ·{" "}
+              <a href="mailto:sales@dynamicvent.com">sales@dynamicvent.com</a>
+            </p>
           </div>
           <div className="footer-links">
             <Link to="/shop">Explore designs</Link>
             <Link to="/how-it-works">Installation guide</Link>
+            <Link to="/about">Our story</Link>
+            <Link to="/trade">Trade quotes</Link>
+            <Link to="/returns-warranty">Returns &amp; Warranty</Link>
             <Link to="/contact">Get in touch</Link>
           </div>
         </div>

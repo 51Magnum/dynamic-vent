@@ -1,0 +1,42 @@
+{
+  "/": {
+    "title": "Flush-Mount Hardwood Floor Vents | DynamicVent",
+    "description": "Aluminum floor vents that sit flush with hardwood and engineered wood, with custom patterns or wording. Designed in Nampa, Idaho.",
+    "image": "https://www.dynamicvent.com/images/dynamicvent-social.jpg"
+  },
+  "/shop": {
+    "title": "Custom Flush Floor Vents, 7 Sizes | DynamicVent",
+    "description": "Build your vent in a few steps. Choose a size, a pattern or custom wording, and an optional shutoff slider, then request a quote.",
+    "image": "https://www.dynamicvent.com/images/dynamicvent-social.jpg"
+  },
+  "/about": {
+    "title": "About DynamicVent | Designed in Nampa, Idaho",
+    "description": "Discover how DynamicVent began with a better floor vent, designed and installed in our own home in Nampa, Idaho. Painted aluminum with optional powder coating.",
+    "image": "https://www.dynamicvent.com/images/dynamicvent-social.jpg"
+  },
+  "/trade": {
+    "title": "Trade Pricing for Builders & Designers | DynamicVent",
+    "description": "Request volume pricing for builders, installers, and designers. Flush floor vents with custom patterns, painted or powder-coated finishes, and rental installation kits.",
+    "image": "https://www.dynamicvent.com/images/dynamicvent-social.jpg"
+  },
+  "/how-it-works": {
+    "title": "How to Install Flush-Mount Floor Vents | DynamicVent",
+    "description": "Watch the DynamicVent installation video and follow the template, routing, and fitting steps for a flush finish in compatible hardwood floors.",
+    "image": "https://www.dynamicvent.com/images/dynamicvent-social.jpg"
+  },
+  "/faq": {
+    "title": "Floor Vent Sizes, Fit & Installation FAQ | DynamicVent",
+    "description": "Answers about DynamicVent sizes, materials, finishes, floor compatibility, installation tools, airflow control, shipping, returns, and trade orders.",
+    "image": "https://www.dynamicvent.com/images/dynamicvent-social.jpg"
+  },
+  "/contact": {
+    "title": "Contact & Request a Floor Vent Quote | DynamicVent",
+    "description": "Contact DynamicVent in Nampa, Idaho about floor vent sizing, custom designs, installation, and project quotes. Email sales@dynamicvent.com or send an inquiry.",
+    "image": "https://www.dynamicvent.com/images/dynamicvent-social.jpg"
+  },
+  "/returns-warranty": {
+    "title": "30-Day Returns & Warranty | DynamicVent",
+    "description": "Return unused, uninstalled standard vents within 30 days of delivery. DynamicVent covers defects in materials and workmanship for 30 days from delivery.",
+    "image": "https://www.dynamicvent.com/images/dynamicvent-social.jpg"
+  }
+}

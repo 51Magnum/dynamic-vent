@@ -43,7 +43,7 @@ export default function Home() {
           <img
             src={galleryImage(1)}
             alt="A precision-cut DynamicVent sitting flush in a herringbone wood floor"
-            fetchPriority="high"
+            fetchpriority="high"
           />
           <div className="image-caption">
             <span>THE FLUSH-MOUNT COLLECTION</span>
@@ -59,6 +59,62 @@ export default function Home() {
           <span>Optional airflow control</span>
         </div>
       </div>
+      <section className="container section home-transformation">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">THE SAME FLOOR. A FINISHED DETAIL.</p>
+            <h2>From opening to flush finish.</h2>
+          </div>
+          <p>A real DynamicVent installation in hardwood flooring.</p>
+        </div>
+        <div className="before-after-grid">
+          <figure>
+            <img
+              src="/images/installation-before.webp"
+              alt="Before fitting the vent: open floor duct with the installation template in place"
+              loading="lazy"
+              width="1200"
+              height="675"
+            />
+            <figcaption>
+              <span className="eyebrow">BEFORE THE VENT GOES IN</span>
+              <p>The template positions the opening for the routing step.</p>
+            </figcaption>
+          </figure>
+          <figure>
+            <img
+              src="/images/installation-after.webp"
+              alt="After installation: a patterned vent sitting flush in the same dark hardwood floor"
+              loading="lazy"
+              width="1200"
+              height="675"
+            />
+            <figcaption>
+              <span className="eyebrow">AFTER INSTALLATION</span>
+              <p>A flush fit, without visible screws or a raised frame.</p>
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+      <section className="container section home-install-video">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">SEE THE FIT, FROM THE FIRST CUT</p>
+            <h2>Watch it come together.</h2>
+          </div>
+          <Link className="text-link" to="/how-it-works">
+            Full installation guide →
+          </Link>
+        </div>
+        <iframe
+          className="guide-video"
+          src="https://www.youtube.com/embed/0Ic_XOCtcm4?rel=0"
+          title="How to install DynamicVent"
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+      </section>
       <section className="container section intro-section">
         <p className="eyebrow">SMALL DETAIL. BIG DIFFERENCE.</p>
         <div className="intro-grid">

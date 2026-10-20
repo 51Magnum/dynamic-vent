@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { colors, sizes } from "../data/options";
+import { ventPrices as prices } from "../data/pricing";
 const patterns = [
   "Chevron",
   "HappyHoliday",
@@ -18,15 +19,7 @@ const patternLabel = (name) =>
     : name === "RecPatter-1"
       ? "Rectangle"
       : name.replace("-", " ");
-const prices = {
-  "4x8": 20,
-  "4x10": 23,
-  "4x12": 30,
-  "4x14": 34,
-  "6x10": 35,
-  "6x12": 40,
-  "6x14": 47,
-};
+
 const kits = {
   none: { label: "No installation kit", price: 0, refund: 0 },
   templateOnly: { label: "Template only", price: 100, refund: 25 },
@@ -39,13 +32,16 @@ const money = (value) =>
 export default function Shop() {
   const [size, setSize] = useState("4x8");
   const [pattern, setPattern] = useState("Chevron");
+  const [custom, setCustom] = useState(false);
+  const [wording, setWording] = useState("");
+  const [finishType, setFinishType] = useState("Painted (standard)");
   const [color, setColor] = useState(colors[0].name);
   const [slider, setSlider] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [kit, setKit] = useState("none");
   const unitPrice = prices[size] * (slider ? 2 : 1);
   const total = unitPrice * quantity + kits[kit].price;
-  const message = `I'd like to discuss this DynamicVent configuration:\nSize: ${size}\nPattern: ${patternLabel(pattern)}\nFinish: ${color}\nAirflow slider: ${slider ? "Yes" : "No"}\nQuantity: ${quantity}\nInstallation kit: ${kits[kit].label}\nEstimated subtotal: ${money(total)} before shipping and tax.${kits[kit].refund ? `\nKit refund upon return: ${money(kits[kit].refund)}` : ""}`;
+  const message = `Please quote this DynamicVent configuration:\nSize: ${size}\nPattern: ${custom ? "Custom wording/design" : patternLabel(pattern)}\nCustom wording: ${custom ? wording.trim() || "To be discussed" : "None"}\nFinish: ${finishType}\nPaint color: ${color}\nShutoff slider: ${slider ? "Yes" : "No"}\nQuantity: ${quantity}\nInstallation kit: ${kits[kit].label}\nEstimated subtotal: ${money(total)} before shipping, tax, powder coating, and custom-design charges.${kits[kit].refund ? `\nKit refund upon return: ${money(kits[kit].refund)}` : ""}`;
   return (
     <div className="container section shop-page">
       <div className="page-intro">
@@ -103,6 +99,42 @@ export default function Shop() {
             <legend>
               <span>02</span> Pick a pattern
             </legend>
+            <div className="design-type-options">
+              <button
+                type="button"
+                className={!custom ? "choice selected" : "choice"}
+                aria-pressed={!custom}
+                onClick={() => setCustom(false)}
+              >
+                Standard pattern
+              </button>
+              <button
+                type="button"
+                className={custom ? "choice selected" : "choice"}
+                aria-pressed={custom}
+                onClick={() => setCustom(true)}
+              >
+                Custom wording or design
+              </button>
+            </div>
+            {custom && (
+              <>
+                <label className="form-label" htmlFor="custom-wording">
+                  Custom wording or design details
+                </label>
+                <textarea
+                  id="custom-wording"
+                  rows="3"
+                  maxLength="500"
+                  value={wording}
+                  onChange={(event) => setWording(event.target.value)}
+                />
+                <p className="field-help">
+                  Describe what you have in mind. Custom designs are priced in
+                  your quote; the image shows a standard pattern for reference.
+                </p>
+              </>
+            )}
             <div className="pattern-options">
               {patterns.map((item) => (
                 <button
@@ -114,7 +146,10 @@ export default function Shop() {
                       : "pattern-choice"
                   }
                   aria-pressed={pattern === item}
-                  onClick={() => setPattern(item)}
+                  onClick={() => {
+                    setPattern(item);
+                    setCustom(false);
+                  }}
                 >
                   <img
                     src={`/vents/thumbnails/${size}/${size}_${item}.webp`}
@@ -130,6 +165,26 @@ export default function Shop() {
             <legend>
               <span>03</span> Choose your finish
             </legend>
+            <label className="form-label" htmlFor="finish-type">
+              Finish type
+            </label>
+            <select
+              id="finish-type"
+              value={finishType}
+              onChange={(event) => setFinishType(event.target.value)}
+            >
+              <option>Painted (standard)</option>
+              <option>Powder-coated</option>
+            </select>
+            <p className="field-help">
+              <a className="text-link" href="mailto:sales@dynamicvent.com">
+                Powder coating available, contact us for pricing
+              </a>
+            </p>
+            <p className="field-help">
+              Standard vents are painted aluminum. Select a color below; powder
+              coating is an optional upgrade.
+            </p>
             <div className="color-options">
               {colors.map((item) => (
                 <button
@@ -163,7 +218,7 @@ export default function Shop() {
                 onChange={(e) => setSlider(e.target.checked)}
               />
               <span>
-                Add an airflow slider
+                Add a shutoff slider
                 <small>
                   Adds {money(prices[size])} per vent to manually restrict or
                   close airflow.
@@ -226,15 +281,16 @@ export default function Shop() {
               <strong>{money(total)}</strong>
             </div>
             <p>
-              Shipping and tax are not included. Final pricing and availability
-              will be confirmed with you.
+              Shipping, tax, powder coating, and custom-design charges are not
+              included. Final pricing and availability will be confirmed with
+              you.
             </p>
             <Link
               className="button full-width"
               to="/contact"
-              state={{ message }}
+              state={{ message, orderSummary: message, inquiryType: "quote" }}
             >
-              Ask about this design <span aria-hidden="true">↗</span>
+              Request a Quote <span aria-hidden="true">↗</span>
             </Link>
             <small>
               Send your selections to our team. No payment is collected.

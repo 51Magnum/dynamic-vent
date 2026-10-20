@@ -22,3 +22,7 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Safe template only; real environment files stay private.
+!.env.example
+/output/

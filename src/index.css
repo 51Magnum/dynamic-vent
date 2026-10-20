@@ -960,3 +960,51 @@ select {
     scroll-behavior: auto !important;
   }
 }
+
+/* Business information and inquiry pages */
+.navigation { gap: 20px; }
+.footer-links { flex-wrap: wrap; }
+.story-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 65px; align-items: start; }
+.story-grid > img { width: 100%; max-height: 650px; object-fit: cover; }
+.story-grid h2, .trade-benefits h2, .policy-sections h2 { font-size: 2rem; margin: 0 0 16px; }
+.story-grid p, .trade-benefits p, .policy-sections p { margin-bottom: 22px; }
+.story-grid h2:not(:first-child) { margin-top: 35px; }
+.trade-benefits article { padding: 0 0 24px; margin-bottom: 24px; border-bottom: 1px solid var(--line); }
+.inquiry-fields { border: 0; padding: 0; margin: 0; min-width: 0; }
+.inquiry-fields:disabled { opacity: .7; }
+.form-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.contact-form input[type="file"] { padding: 12px 0; border: 0; background: transparent; max-width: 100%; font-size: .8rem; }
+.form-trap { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+.policy-sections { max-width: 780px; }
+.policy-sections section { border-top: 1px solid var(--line); padding: 35px 0; }
+.policy-sections a:not(.button) { text-decoration: underline; }
+.faq-page-links { display: flex; flex-wrap: wrap; gap: 25px; margin-bottom: 30px; }
+.home-install-video .guide-video { margin-bottom: 0; }
+@media (min-width: 761px) and (max-width: 1100px) {
+  .header-inner { flex-wrap: wrap; padding-block: 20px; gap: 18px; }
+  .navigation { flex: 1 0 100%; justify-content: space-between; gap: 12px; }
+}
+@media (max-width: 760px) {
+  .story-grid { grid-template-columns: 1fr; gap: 30px; }
+  .story-grid > img { max-height: 400px; }
+  .form-pair { grid-template-columns: 1fr; gap: 0; }
+  .footer-links { gap: 16px; }
+}
+
+.before-after-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+.before-after-grid figure { margin: 0; }
+.before-after-grid img { width: 100%; height: auto; aspect-ratio: 16/9; object-fit: cover; }
+.before-after-grid figcaption { padding: 20px 0 0; }
+.before-after-grid figcaption p { margin-top: 10px; font-size: .85rem; }
+.home-transformation { padding-bottom: 0; }
+@media (max-width: 760px) { .before-after-grid { grid-template-columns: 1fr; gap: 30px; } }
+
+.design-type-options { display: flex; gap: 10px; margin-bottom: 18px; }
+.design-type-options button { flex: 1; padding: 12px; }
+.configuration-options textarea { width: 100%; min-height: 100px; }
+.quote-order { margin-top: 24px; padding: 20px; background: #fff; }
+.quote-order h2 { font-size: 1.5rem; margin-bottom: 12px; }
+.quote-order pre { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; font-size: .85rem; }
+.trade-benefits-list { padding-left: 22px; margin-bottom: 28px; }
+.trade-benefits-list li { margin-bottom: 16px; }
+.trade-copy > p { margin-bottom: 22px; }

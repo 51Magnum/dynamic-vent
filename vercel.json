@@ -1,0 +1,39 @@
+{
+  "rewrites": [
+    {
+      "source": "/shop",
+      "destination": "/shop.html"
+    },
+    {
+      "source": "/about",
+      "destination": "/about.html"
+    },
+    {
+      "source": "/trade",
+      "destination": "/trade.html"
+    },
+    {
+      "source": "/how-it-works",
+      "destination": "/how-it-works.html"
+    },
+    {
+      "source": "/faq",
+      "destination": "/faq.html"
+    },
+    {
+      "source": "/contact",
+      "destination": "/contact.html"
+    },
+    {
+      "source": "/returns-warranty",
+      "destination": "/returns-warranty.html"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/policies",
+      "destination": "/returns-warranty",
+      "permanent": true
+    }
+  ]
+}

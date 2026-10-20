@@ -68,3 +68,40 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+
+## Quote requests and trade artwork
+
+The site uses a quote workflow rather than collecting payment. `/shop` passes the
+configured order to `/contact`; `/trade` collects project quantities, wording,
+and up to three PNG/JPG/PDF attachments (2 MB combined). The contact API sends
+these to `sales@dynamicvent.com`, with the customer’s address as Reply-To.
+Confirmation is shown only after SMTP accepts the message; this is not a
+mailbox-delivery guarantee. Failed submissions keep the form contents.
+
+Set `EMAIL_USER` and `EMAIL_PASS` as server-only environment variables in Vercel.
+All inquiries go to `sales@dynamicvent.com`. Never use a `REACT_APP_`
+prefix for these values. `.env.example` contains names only. Local API development
+uses `node server.js`; run the frontend through `vercel dev` for same-origin API
+routing, or configure a local proxy. Do not commit real environment files.
+
+Run `npm test -- --watchAll=false`, `npm run test:server`, and `npm run build`.
+The build generates a distinct HTML title, description, canonical URL, and social
+metadata for every route, plus `sitemap.xml`. Route metadata lives in
+`src/data/page-meta.json`; new routes also need an entry in `vercel.json`.
+Run `npm run check:secrets` after staging changes, before committing. This is a
+basic staged-file safeguard, not a complete secret scanner.
+
+## Credential exposure follow-up
+
+Commit `41e6b0e` included a populated SMTP password in `.env`. That file is absent
+from the current tracked tree, but the historical credential must be treated as
+exposed. A Microsoft 365 administrator must rotate the password, revoke existing
+sessions, review sign-in activity and mailbox forwarding/inbox rules, and update
+Vercel’s `EMAIL_PASS` for each environment where it is used. Redeploy after changing
+the variable. Do not copy the exposed or replacement password into issues, logs,
+chat, or commits. Rewriting Git history is not a substitute for rotation.
+
+The owner-approved About, Trade, and 30-day Returns & Warranty copy is published
+in the corresponding page components. Do not add a phone number. Standard vents
+are painted aluminum; powder coating is an optional upgrade priced by quote.

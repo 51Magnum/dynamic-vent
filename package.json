@@ -20,9 +20,11 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "react-scripts build && node scripts/generate-page-metadata.cjs",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "test:server": "node --test tests/contact-handler.test.cjs",
+    "check:secrets": "node scripts/check-secrets.cjs"
   },
   "eslintConfig": {
     "extends": [

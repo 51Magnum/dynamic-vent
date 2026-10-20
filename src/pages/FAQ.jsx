@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 function FAQ() {
   const faqs = [
     {
@@ -13,7 +14,7 @@ function FAQ() {
     {
       question: "What materials are the vents made from?",
       answer:
-        "Each DynamicVent is made from precision-cut aluminum, powder coated in a range of designer finishes. The vents are lightweight, durable, and built to last.",
+        "Each DynamicVent is made from precision-cut aluminum, painted in a range of finishes as standard, with powder coating available as an optional upgrade. The vents are lightweight, durable, and built to last.",
     },
     {
       question: "How thick are the vents?",
@@ -63,7 +64,7 @@ function FAQ() {
     {
       question: "What is your return policy?",
       answer:
-        "Standard items can be returned within 30 days if unused. Custom orders are final sale unless there's a manufacturing defect.",
+        "Unused, uninstalled standard vents can be returned within 30 days of delivery for a full refund. Custom-pattern and custom-wording vents cannot be returned unless they arrive damaged or defective.",
     },
     {
       question: "Do you offer discounts for builders or volume orders?",
@@ -82,6 +83,14 @@ function FAQ() {
           finish.
         </p>
       </div>
+      <p className="faq-page-links">
+        <Link className="text-link" to="/returns-warranty">
+          30-day returns & warranty →
+        </Link>{" "}
+        <Link className="text-link" to="/trade">
+          Trade & volume quotes →
+        </Link>
+      </p>
       <div className="faq-list">
         {faqs.map((faq, index) => (
           <details key={index}>
