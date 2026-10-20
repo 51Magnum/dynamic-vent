@@ -5,6 +5,7 @@ const base = fs.readFileSync(
   path.join(__dirname, "../build/index.html"),
   "utf8",
 );
+const shopMarkup = require("./render-shop.cjs")();
 const escape = (value) =>
   value
     .replace(/&/g, "&amp;")
@@ -13,7 +14,7 @@ const escape = (value) =>
     .replace(/>/g, "&gt;");
 for (const [route, metadata] of Object.entries(pages)) {
   const url = `https://www.dynamicvent.com${route === "/" ? "/" : route}`;
-  const html = base
+  let html = base
     .replace(/<title>.*?<\/title>/, `<title>${escape(metadata.title)}</title>`)
     .replace(
       /<meta\s+name="description"\s+content="[^"]*"\s*\/?\s*>/,
@@ -22,6 +23,11 @@ for (const [route, metadata] of Object.entries(pages)) {
     .replace(
       "</head>",
       `<link rel="canonical" href="${url}"/><meta property="og:title" content="${escape(metadata.title)}"/><meta property="og:description" content="${escape(metadata.description)}"/><meta property="og:url" content="${url}"/><meta property="og:type" content="website"/><meta property="og:image" content="${escape(metadata.image)}"/></head>`,
+    );
+  if (route === "/shop")
+    html = html.replace(
+      '<div id="root"></div>',
+      `<div id="root" data-prerendered="shop">${shopMarkup}</div>`,
     );
   const target = path.join(
     __dirname,

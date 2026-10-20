@@ -1,4 +1,5 @@
 import { useState } from "react";
+import PatternThumbnail from "../components/PatternThumbnail";
 import { Link } from "react-router-dom";
 import { colors, sizes } from "../data/options";
 import { ventPrices as prices } from "../data/pricing";
@@ -56,6 +57,9 @@ export default function Shop() {
             <img
               src={`/vents/previews/${size}/${size}_${pattern}.webp`}
               fetchpriority="high"
+              decoding="async"
+              width="960"
+              height="620"
               alt={`${size} vent in the ${patternLabel(pattern)} pattern; pattern preview only`}
             />
             <p>
@@ -151,10 +155,8 @@ export default function Shop() {
                     setCustom(false);
                   }}
                 >
-                  <img
+                  <PatternThumbnail
                     src={`/vents/thumbnails/${size}/${size}_${item}.webp`}
-                    alt=""
-                    loading="lazy"
                   />
                   <span>{patternLabel(item)}</span>
                 </button>

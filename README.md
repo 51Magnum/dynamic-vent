@@ -105,3 +105,17 @@ chat, or commits. Rewriting Git history is not a substitute for rotation.
 The owner-approved About, Trade, and 30-day Returns & Warranty copy is published
 in the corresponding page components. Do not add a phone number. Standard vents
 are painted aluminum; powder coating is an optional upgrade priced by quote.
+
+
+## Shop first render
+
+The build renders `/shop` using the shared React layout and shop components.
+Its HTML includes the shop content before any browser JavaScript runs;
+`src/index.js` hydrates that markup. Other routes are split into separate chunks
+so their page code is not needed to open the shop. Pattern thumbnails start only
+when their area approaches the viewport. Keep build rendering free of browser-only
+APIs, and run `npm run test:prerender` after `npm run build`.
+
+For a browser timing check, open `/shop?measure=1`. A buffered Paint Timing
+observer records first contentful paint in a `shop-first-contentful-paint-ms`
+meta tag. Measurement is opt-in and makes no analytics/network requests.

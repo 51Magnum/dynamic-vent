@@ -24,7 +24,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "test:server": "node --test tests/contact-handler.test.cjs",
-    "check:secrets": "node scripts/check-secrets.cjs"
+    "check:secrets": "node scripts/check-secrets.cjs",
+    "test:prerender": "node --test tests/shop-prerender.test.cjs"
   },
   "eslintConfig": {
     "extends": [
