@@ -136,3 +136,31 @@ test("missing email configuration fails clearly and unsupported methods cannot s
   assert.equal(other.code, 405);
   assert.equal(other.headers.Allow, "POST");
 });
+
+test("diagnostics identify disabled SMTP without logging the provider response or credentials", async () => {
+  const records = [];
+  const original = console.error;
+  console.error = (...args) => records.push(args);
+  try {
+    const app = setup(async () => {
+      const error = new Error("private password content");
+      error.code = "EAUTH";
+      error.responseCode = 535;
+      error.response =
+        "535 5.7.139 Authentication unsuccessful, SmtpClientAuthentication is disabled for the Tenant. private password content";
+      throw error;
+    });
+    const res = response();
+    await app.handler({ method: "POST", body: valid }, res);
+    const logged = JSON.stringify(records);
+    assert.match(logged, /SMTP_AUTH_DISABLED/);
+    assert.match(logged, /535/);
+    assert.doesNotMatch(
+      logged,
+      /private password content|Authentication unsuccessful/,
+    );
+    assert.equal(res.code, 502);
+  } finally {
+    console.error = original;
+  }
+});
