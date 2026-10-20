@@ -30,6 +30,11 @@ test("includes slider, quantity and kit charge in the inquiry while keeping the 
   fireEvent.change(screen.getByLabelText(/Installation kit/), {
     target: { value: "withRouter" },
   });
+  expect(
+    screen.getByText(
+      "Doubles the vent price. Manually restrict or close airflow.",
+    ),
+  ).toBeInTheDocument();
   expect(screen.getByText("$532.00")).toBeInTheDocument();
   expect(screen.getByText(/\$225.00 refunded upon return/)).toBeInTheDocument();
   fireEvent.click(screen.getByRole("link", { name: /Request a Quote/ }));

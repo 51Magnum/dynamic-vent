@@ -42,6 +42,7 @@ export default function InquiryForm({
     size: "4x8",
     finish: "Not decided",
     finishType: "Painted (standard)",
+    finishChoice: "Not decided",
     orderSummary: "",
     wording: "",
     deadline: "",
@@ -84,7 +85,7 @@ export default function InquiryForm({
     setLoading(true);
     try {
       const message = trade
-        ? `Trade quote request\nCompany: ${form.company}\nTrade: ${form.role}\nQuantity: ${form.quantity}\nDuct size: ${form.size}\nFinish: ${form.finishType}\nPaint color: ${form.finish}\nCustom wording: ${form.wording || "None specified"}\nNeeded by: ${form.deadline || "Flexible"}\nDelivery ZIP/postal code: ${form.postalCode}\nVolume pricing requested; final pricing to be confirmed.\n\nProject details:\n${form.message}`
+        ? `Trade quote request\nCompany: ${form.company}\nTrade: ${form.role}\nQuantity: ${form.quantity}\nDuct size: ${form.size}\nFinish: ${form.finishChoice}\nCustom wording: ${form.wording || "None specified"}\nNeeded by: ${form.deadline || "Flexible"}\nDelivery ZIP/postal code: ${form.postalCode}\nVolume pricing requested; final pricing to be confirmed.\n\nProject details:\n${form.message}`
         : form.orderSummary
           ? `${form.orderSummary}\n\nCustomer message:\n${form.message || "None provided"}`
           : form.message;
@@ -245,44 +246,50 @@ export default function InquiryForm({
               </div>
             </div>
             <p className="field-help">
-              Standard vent reference: $
+              Standard vents: ${retailPrices[form.size].toFixed(2)} per vent.
+              Estimated standard-vent total for{" "}
+              {Number(form.quantity || 0).toLocaleString("en-US")} vents: $
               {(
                 retailPrices[form.size] * Number(form.quantity || 0)
-              ).toLocaleString("en-US")}{" "}
-              before sliders, customization, shipping, and tax. Request a
-              project quote for volume pricing.
-            </p>
-            <label className="form-label" htmlFor="trade-finish-type">
-              Finish type
-            </label>
-            <select
-              id="trade-finish-type"
-              name="finishType"
-              value={form.finishType}
-              onChange={update}
-            >
-              <option>Painted (standard)</option>
-              <option>Powder-coated</option>
-            </select>
-            <p className="field-help">
-              <a href="mailto:sales@dynamicvent.com">
-                Powder coating available, contact us for pricing
-              </a>
+              ).toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+              . Before sliders, customization, powder coating, shipping, and
+              tax. Request a project quote for volume pricing.
             </p>
             <label className="form-label" htmlFor="trade-finish">
               Finish
             </label>
             <select
               id="trade-finish"
-              name="finish"
-              value={form.finish}
+              name="finishChoice"
+              value={form.finishChoice}
               onChange={update}
             >
               <option>Not decided</option>
-              {colors.map((color) => (
-                <option key={color.name}>{color.name}</option>
-              ))}
+              <optgroup label="Painted (standard)">
+                <option>Painted (standard) — color to be confirmed</option>
+                {colors.map((color) => (
+                  <option
+                    key={color.name}
+                  >{`Painted (standard) — ${color.name}`}</option>
+                ))}
+              </optgroup>
+              <optgroup label="Powder-coated (upgrade)">
+                <option>Powder-coated — color to be confirmed</option>
+                {colors.map((color) => (
+                  <option
+                    key={color.name}
+                  >{`Powder-coated — ${color.name}`}</option>
+                ))}
+              </optgroup>
             </select>
+            <p className="field-help">
+              <a href="mailto:sales@dynamicvent.com">
+                Powder coating available, contact us for pricing
+              </a>
+            </p>
             <label className="form-label" htmlFor="wording">
               Custom wording (optional)
             </label>

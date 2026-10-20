@@ -1,11 +1,15 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import InstallationVideo from "../components/InstallationVideo";
 import Lightbox from "yet-another-react-lightbox";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import "yet-another-react-lightbox/styles.css";
 
-const galleryImage = (number) =>
+const originalGalleryImage = (number) =>
   number <= 4 ? `/gallery${number}-retouched.png` : `/gallery${number}.jpg`;
+
+const galleryImage = (number, large = false) =>
+  `/images/gallery/${number}-${large ? "large" : "thumb"}.webp`;
 
 export default function Home() {
   const [index, setIndex] = useState(-1);
@@ -41,7 +45,7 @@ export default function Home() {
         </div>
         <div className="hero-image">
           <img
-            src={galleryImage(1)}
+            src={galleryImage(1, true)}
             alt="A precision-cut DynamicVent sitting flush in a herringbone wood floor"
             fetchpriority="high"
           />
@@ -106,14 +110,7 @@ export default function Home() {
             Full installation guide →
           </Link>
         </div>
-        <iframe
-          className="guide-video"
-          src="https://www.youtube.com/embed/0Ic_XOCtcm4?rel=0"
-          title="How to install DynamicVent"
-          loading="lazy"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        />
+        <InstallationVideo />
       </section>
       <section className="container section intro-section">
         <p className="eyebrow">SMALL DETAIL. BIG DIFFERENCE.</p>
@@ -177,8 +174,8 @@ export default function Home() {
         <div className="container installation-grid">
           <div className="installation-photo">
             <img
-              src="/step4-drop.jpg"
-              alt="Placing the vent into its prepared opening"
+              src="/images/installation-after.webp"
+              alt="Finished DynamicVent installation in hardwood flooring"
               loading="lazy"
             />
           </div>
@@ -233,7 +230,7 @@ export default function Home() {
           index={index}
           close={() => setIndex(-1)}
           slides={Array.from({ length: 15 }, (_, i) => ({
-            src: galleryImage(i + 1),
+            src: originalGalleryImage(i + 1),
             alt: `Installed DynamicVent example ${i + 1}`,
           }))}
           plugins={[Zoom]}

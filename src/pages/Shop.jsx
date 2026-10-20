@@ -220,8 +220,7 @@ export default function Shop() {
               <span>
                 Add a shutoff slider
                 <small>
-                  Adds {money(prices[size])} per vent to manually restrict or
-                  close airflow.
+                  Doubles the vent price. Manually restrict or close airflow.
                 </small>
               </span>
             </label>

@@ -71,6 +71,9 @@ test("trade quote includes quantity, wording, company and the uploaded logo", as
     ["Project details and size breakdown", "All 4x8, with airflow sliders."],
   ])
     fireEvent.change(screen.getByLabelText(label), { target: { value } });
+  fireEvent.change(screen.getByLabelText("Finish", { exact: true }), {
+    target: { value: "Painted (standard) — Brown" },
+  });
   fireEvent.change(screen.getByLabelText("Logo or artwork (optional)"), {
     target: {
       files: [
@@ -85,6 +88,7 @@ test("trade quote includes quantity, wording, company and the uploaded logo", as
   expect(body.message).toContain("Quantity: 25");
   expect(body.message).toContain("Custom wording: Welcome");
   expect(body.message).toContain("Builder Co");
+  expect(body.message).toContain("Finish: Painted (standard) — Brown");
   expect(body.attachments[0].name).toBe("logo.pdf");
   expect(body.attachments[0].content).toBeTruthy();
   await screen.findByText(quoteConfirmation);
@@ -113,4 +117,22 @@ test("configured order is retained separately from the customer's editable messa
   expect(body.message).toContain("Customer message:\nPlease ship to Nampa.");
   expect(body.name).toBe("Trade Buyer");
   expect(body.email).toBe("buyer@example.com");
+});
+
+test("trade pricing separates unit price from quantity total and offers one finish selector", () => {
+  render(<InquiryForm trade />);
+  expect(
+    screen.getByText(/Standard vents: \$20.00 per vent/),
+  ).toHaveTextContent("Estimated standard-vent total for 10 vents: $200.00");
+  fireEvent.change(screen.getByLabelText("Duct size"), {
+    target: { value: "6x12" },
+  });
+  expect(
+    screen.getByText(/Standard vents: \$40.00 per vent/),
+  ).toHaveTextContent("Estimated standard-vent total for 10 vents: $400.00");
+  expect(screen.getAllByLabelText("Finish", { exact: true })).toHaveLength(1);
+  expect(screen.queryByLabelText("Finish type")).not.toBeInTheDocument();
+  expect(screen.getByLabelText("Finish", { exact: true })).toHaveValue(
+    "Not decided",
+  );
 });

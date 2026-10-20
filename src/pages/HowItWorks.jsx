@@ -1,3 +1,4 @@
+import InstallationVideo from "../components/InstallationVideo";
 import { Link } from "react-router-dom";
 const steps = [
   [
@@ -33,18 +34,15 @@ export default function HowItWorks() {
           each step.
         </p>
       </div>
-      <iframe
-        className="guide-video"
-        src="https://www.youtube.com/embed/0Ic_XOCtcm4?rel=0"
-        title="How to install DynamicVent"
-        loading="lazy"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
-      />
+      <InstallationVideo />
       <div className="guide-steps">
         {steps.map(([image, title, text], i) => (
           <article key={image}>
-            <img src={`/${image}`} alt={title} loading="lazy" />
+            <img
+              src={`/images/steps/${image.replace(".jpg", ".webp")}`}
+              alt={title}
+              loading="lazy"
+            />
             <p className="eyebrow">STEP 0{i + 1}</p>
             <h2>{title}</h2>
             <p>{text}</p>
