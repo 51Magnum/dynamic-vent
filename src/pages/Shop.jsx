@@ -95,9 +95,7 @@ export default function Shop() {
         </div>
         <div className="configuration-options">
           <fieldset>
-            <legend>
-              <span>01</span> Find your size
-            </legend>
+            <legend>Find your size</legend>
             <p className="field-help">
               Choose a nominal duct size. Overall vent dimensions are listed
               below.
@@ -118,9 +116,7 @@ export default function Shop() {
             </div>
           </fieldset>
           <fieldset>
-            <legend>
-              <span>02</span> Pick a pattern
-            </legend>
+            <legend>Pick a pattern</legend>
             <div className="design-type-options">
               <button
                 type="button"
@@ -181,9 +177,7 @@ export default function Shop() {
             </div>
           </fieldset>
           <fieldset>
-            <legend>
-              <span>03</span> Choose your finish
-            </legend>
+            <legend>Choose your finish</legend>
             <label className="form-label" htmlFor="finish-type">
               Finish type
             </label>
@@ -228,9 +222,7 @@ export default function Shop() {
             </div>
           </fieldset>
           <fieldset>
-            <legend>
-              <span>04</span> The finishing details
-            </legend>
+            <legend>The finishing details</legend>
             <label className="check-option">
               <input
                 type="checkbox"
@@ -260,30 +252,46 @@ export default function Shop() {
                 )
               }
             />
-            <label className="check-option">
-              <input
-                type="checkbox"
-                checked={template}
-                onChange={(event) => setTemplate(event.target.checked)}
-                aria-describedby="template-help"
-              />
-              <span>
-                Add the installation template{" "}
-                <small>
-                  {money(catalog.template.price)}
-                  {catalog.template.priceConfirmed ? "" : " (estimated)"}
-                </small>
-              </span>
-            </label>
-            <p id="template-help" className="field-help">
-              {catalog.template.description} One template works for any number
-              of vents, and it's yours to keep.
-            </p>
-            <RouterGuidance />
-            <p className="field-help">Route {routeDepth(slider)} in deep</p>
-            <Link className="text-link" to="/how-it-works#router-requirements">
-              Router and base plate requirements →
-            </Link>
+            <div className="template-choice">
+              <label className="check-option template-choice__select">
+                <input
+                  type="checkbox"
+                  checked={template}
+                  onChange={(event) => setTemplate(event.target.checked)}
+                  aria-describedby="template-help"
+                />
+                <span className="template-choice__heading">
+                  <strong>Add the installation template</strong>
+                  <span className="template-choice__price">
+                    {money(catalog.template.price)}
+                  </span>
+                </span>
+              </label>
+              <div className="template-choice__intro">
+                <img
+                  src="/images/steps/step3-route.webp"
+                  alt="Router seated inside the installation template"
+                  loading="lazy"
+                  width="960"
+                  height="448"
+                />
+                <p id="template-help" className="field-help">
+                  {catalog.template.description} One template works for any
+                  number of vents, and it's yours to keep.
+                </p>
+              </div>
+              <p className="route-depth">Route {routeDepth(slider)} in deep</p>
+              <details className="template-choice__guidance">
+                <summary>Recommended router setup</summary>
+                <RouterGuidance />
+              </details>
+              <Link
+                className="text-link"
+                to="/how-it-works#router-requirements"
+              >
+                Router and base plate requirements →
+              </Link>
+            </div>
           </fieldset>
           <div className="configuration-summary">
             <div>

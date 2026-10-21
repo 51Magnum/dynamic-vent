@@ -45,14 +45,13 @@ export default function HowItWorks() {
       </div>
       <InstallationVideo />
       <div className="guide-steps">
-        {steps.map(([image, title, text], i) => (
+        {steps.map(([image, title, text]) => (
           <article key={image}>
             <img
               src={`/images/steps/${image.replace(".jpg", ".webp")}`}
               alt={title}
               loading="lazy"
             />
-            <p className="eyebrow">STEP 0{i + 1}</p>
             <h2>{title}</h2>
             <p>{text}</p>
           </article>

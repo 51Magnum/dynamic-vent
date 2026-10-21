@@ -510,13 +510,6 @@ main:focus {
   font-size: 1.6rem;
   margin-bottom: 18px;
 }
-.configuration-options legend > span {
-  font-family: Arial, sans-serif;
-  font-size: 0.7rem;
-  color: var(--accent);
-  margin-right: 14px;
-  vertical-align: middle;
-}
 .field-help {
   font-size: 0.75rem;
   margin-bottom: 15px;
@@ -1028,3 +1021,51 @@ select {
 .contact-form fieldset { min-width: 0; }
 
 #router-requirements { scroll-margin-top: 120px; }
+
+/* Installation guidance: clear specifications, real photos, and distinct depth choices. */
+.router-setup { margin-top: 32px; padding: clamp(24px, 4vw, 48px); background: #ebe7dd; border: 1px solid var(--line); }
+.router-setup h2 { margin: 0 0 18px; font-size: clamp(1.8rem, 3.2vw, 2.7rem); line-height: 1.12; }
+.router-setup__lead { max-width: 820px; font-size: 1rem; line-height: 1.75; margin: 0 0 30px; color: var(--ink); }
+.router-setup__grid { display: block; }
+.router-setup__diagram { margin: 0 0 32px; }
+.router-setup__diagram > a { display: block; background: #f4f1e8; border: 1px solid var(--line); text-decoration: none; }
+.router-setup__diagram img { display: block; width: 100%; height: auto; }
+.router-setup__image-link { display: block; padding: 12px 18px; border-top: 1px solid var(--line); font-size: .75rem; text-align: right; color: var(--accent); }
+.router-setup__diagram figcaption { padding-top: 14px; font-size: .8rem; line-height: 1.7; color: var(--muted); }
+.router-setup__specs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin: 0; min-width: 0; }
+.router-setup__specs > div { padding: 0 0 20px; margin: 0; border-bottom: 1px solid #b8b7ac; }
+.router-setup__specs > div:last-child { margin-bottom: 0; }
+.router-setup__specs dt { font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 700; margin-bottom: 9px; }
+.router-setup__specs dd { margin: 0; font-size: .9rem; line-height: 1.75; overflow-wrap: anywhere; }
+.router-setup__depths { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 30px 0 22px; }
+.router-setup__depths > p { padding: 20px 24px; margin: 0; background: #f9f7f1; border-top: 3px solid var(--accent); }
+.router-setup__depths span { display: block; font-size: .8rem; color: var(--muted); margin-bottom: 9px; }
+.router-setup__depths strong { display: block; font-family: var(--serif); font-size: clamp(1.2rem, 2vw, 1.6rem); font-weight: 400; line-height: 1.35; }
+.router-setup__measurement { margin: 0 0 18px; font-size: .9rem; line-height: 1.8; }
+.router-setup > .field-help { margin: 0; line-height: 1.8; }
+.router-setup--compact { margin-top: 20px; padding: 22px; }
+.router-setup--compact .router-setup__specs { grid-template-columns: 1fr; gap: 20px; }
+.router-setup--compact .router-setup__lead { font-size: .9rem; }
+.router-setup--compact .router-setup__depths > p { padding: 16px; }
+.template-choice { margin-top: 28px; padding: 22px; border: 1px solid var(--line); background: #fffdf8; }
+.template-choice__select { min-height: 44px; align-items: center; margin-bottom: 16px; }
+.template-choice__heading { display: flex; justify-content: space-between; align-items: center; gap: 14px; width: 100%; }
+.template-choice__heading strong { font-size: .95rem; font-weight: 600; line-height: 1.5; }
+.template-choice__price { font-family: var(--serif); font-size: 1.5rem; white-space: nowrap; }
+.template-choice__intro { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 18px; align-items: start; }
+.template-choice__intro img { width: 112px; height: 94px; object-fit: cover; object-position: 35% center; }
+.template-choice__intro .field-help { margin: 0; line-height: 1.75; }
+.route-depth { margin: 20px 0; padding: 12px 16px; border-left: 3px solid var(--accent); background: #ebe7dd; font-size: .85rem; font-weight: 600; }
+.template-choice__guidance { border-top: 1px solid var(--line); margin: 0 0 16px; }
+.template-choice__guidance summary { padding: 16px 0; font-size: .85rem; cursor: pointer; min-height: 44px; }
+.template-choice__guidance .field-help { line-height: 1.8; }
+.template-choice > .text-link { display: inline-flex; align-items: center; min-height: 44px; font-size: .8rem; }
+@media (max-width: 700px) {
+  .router-setup__grid { grid-template-columns: 1fr; gap: 24px; }
+  .router-setup__specs { grid-template-columns: 1fr; gap: 20px; }
+  .router-setup__depths { grid-template-columns: 1fr; }
+  .template-choice { padding: 18px; }
+  .template-choice__heading { flex-wrap: wrap; gap: 4px 12px; }
+  .template-choice__intro { grid-template-columns: 1fr; }
+  .template-choice__intro img { width: 100%; height: auto; aspect-ratio: 2 / 1; }
+}
