@@ -68,3 +68,23 @@ test("webhook errors and timeouts never reject and log only the lead id", async 
     console.log = originalLog;
   }
 });
+
+test("default path logs one lead without contacting a webhook", async () => {
+  const original = console.log;
+  const logs = [];
+  let requests = 0;
+  console.log = (line) => logs.push(JSON.parse(line));
+  try {
+    await createLeadLogger({
+      env: {},
+      fetchImpl: async () => {
+        requests++;
+        throw new Error("must stay disabled");
+      },
+    })(record);
+    assert.equal(requests, 0);
+    assert.deepEqual(logs, [{ event: "lead", ...record }]);
+  } finally {
+    console.log = original;
+  }
+});

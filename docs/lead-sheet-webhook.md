@@ -1,5 +1,9 @@
 # Optional private Google Sheet lead archive
 
+> **Privacy prerequisite:** Do not set LEAD_WEBHOOK_URL in Production until the /privacy page is live and lists Google Sheets.
+> Leave the Production variable unset. Until then, configure and test this sink
+> only in Preview, using an owner-authorized test submission.
+
 This sink is disabled unless `LEAD_WEBHOOK_URL` is set. Email remains the primary
 record. Nothing here creates a paid service. Keep the spreadsheet private.
 
@@ -16,7 +20,7 @@ record. Nothing here creates a paid service. Keep the spreadsheet private.
    ([Google event documentation](https://developers.google.com/apps-script/guides/web)).
    The generic logger always sends `X-Lead-Secret`, but this direct Apps Script
    example must also receive the same secret as a query parameter. Set Vercel's
-   `LEAD_WEBHOOK_URL` to the deployment `/exec` URL followed by
+   **Preview** `LEAD_WEBHOOK_URL` to the deployment `/exec` URL followed by
    `?secret=YOUR_URL_ENCODED_SECRET`, and `LEAD_WEBHOOK_SECRET` to that secret.
    Treat the complete URL as a secret; do not share it in chat, logs, or Git.
    A different webhook that supports headers should authenticate `X-Lead-Secret`

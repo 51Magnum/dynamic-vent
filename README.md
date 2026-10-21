@@ -118,6 +118,10 @@ meta tag. Measurement is opt-in and makes no analytics/network requests.
 
 ## Contact pipeline
 
+> **Privacy prerequisite:** Do not set LEAD_WEBHOOK_URL in Production until the /privacy page is live and lists Google Sheets.
+> Keep the Production variable unset. Preview-only webhook tests may be enabled
+> with owner authorization; publishing the page does not automatically enable the sink.
+
 `/api/contact` validates and trims input, drops honeypot submissions with a success
 response, applies IP limits before decoding artwork, and validates up to three
 PNG/JPG/PDF files (2 MB combined). Client IP precedence is first `x-forwarded-for`,
@@ -163,7 +167,7 @@ attachment filenames/byte counts, and delivery flags. It never contains artwork
 content or IP. Only the `lead` event contains customer data; error events contain
 controlled diagnostics and lead IDs. Protect access to runtime logs accordingly.
 Vercel runtime logs have short retention (about one hour on Hobby and one day on
-Pro), so they are **not durable storage**. The internal email remains the primary
+Pro; the project moves to Pro at commercial launch), so they are **not durable storage**. The internal email remains the primary
 record. See [Vercel's retention documentation](https://vercel.com/docs/logs/runtime).
 
 For a recommended free durable record, set `LEAD_WEBHOOK_URL` and
