@@ -25,11 +25,9 @@ export default function Shop() {
   const [params, setParams] = useSearchParams();
   // Render defaults on server and first client render, then restore the URL.
   const [config, setConfig] = useState(defaults);
-  const [hasSelectedSize, setHasSelectedSize] = useState(false);
   const [wording, setWordingState] = useState("");
   useEffect(() => {
     setConfig(parseQuoteParams(params));
-    setHasSelectedSize(Object.hasOwn(catalog.templatePrices, params.get("size")));
   }, [params]);
   useEffect(() => {
     setWordingState(readShopWording());
@@ -266,7 +264,7 @@ export default function Shop() {
                 <span className="template-choice__heading">
                   <strong>Add the installation template set</strong>
                   <span className="template-choice__price">
-                    {templatePriceLabel(hasSelectedSize ? size : undefined)}
+                    {templatePriceLabel(size)}
                   </span>
                 </span>
               </label>
