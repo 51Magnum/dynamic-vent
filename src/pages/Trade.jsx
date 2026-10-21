@@ -16,7 +16,7 @@ export default function Trade() {
       <div className="contact-grid">
         <div className="trade-copy">
           <ul className="trade-benefits-list">
-            <li>Volume pricing for multi-room and multi-home projects: {catalog.tradeDiscounts.map(tier => `${tier.minimumQuantity}+ vents: ${tier.percent}% off`).join("; ")}. Discounts apply to vents only.</li>
+            <li>Trade pricing provided by email for your project</li>
             <li>Custom patterns or wording for a signature look</li>
             <li>Painted or powder-coated finishes</li>
             <li>

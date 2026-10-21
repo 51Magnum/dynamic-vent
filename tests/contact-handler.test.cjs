@@ -697,7 +697,7 @@ test("both emails charge the selected size template once at full price", async (
 });
 
 
-test("Trade emails use server-calculated tiers and discounted slider prices", async () => {
+test("internal Trade emails include pricing for review; customer acknowledgments omit automatic discounts", async () => {
   for (const [quantity, percent] of [[9,0],[10,10],[25,15],[50,20],[100,25]]) {
     for (const slider of [false,true]) {
       const app = setup();
@@ -705,11 +705,12 @@ test("Trade emails use server-calculated tiers and discounted slider prices", as
       await app.handler({method:"POST",body:{...valid,inquiryType:"trade",tradePricing:{size:"4x8",quantity,slider,discountPercent:99,displayedTotal:1}}},res);
       assert.equal(res.code,200);
       const total = Math.round(catalog.ventPrices["4x8"]*(100-percent))/100*(slider?2:1)*quantity;
-      for (const mail of app.sent) {
-        assert.ok(mail.text.includes(`Trade discount (vents only): ${percent}%`));
-        assert.ok(mail.text.includes(`Estimated standard-vent total: ${money(total)}`));
-        assert.ok(mail.text.includes("Templates are not discounted."));
-      }
+      const internal = app.sent.find(mail => mail.to === "sales@dynamicvent.com");
+      const confirmation = app.sent.find(mail => mail.to === valid.email);
+      assert.ok(internal.text.includes(`Trade discount (vents only): ${percent}%`));
+      assert.ok(internal.text.includes(`Estimated standard-vent total: ${money(total)}`));
+      assert.ok(internal.text.includes("Templates are not discounted."));
+      assert.doesNotMatch(confirmation.text, /Trade discount|Estimated standard-vent total/);
     }
   }
 });

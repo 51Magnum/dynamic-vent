@@ -123,13 +123,13 @@ test("trade pricing separates unit price from quantity total and offers one fini
   render(<InquiryForm trade />);
   expect(
     screen.getByText(/Standard vents: \$42.00 retail per vent/),
-  ).toHaveTextContent("Estimated standard-vent total for 10 vents: $378.00");
+  ).toHaveTextContent("Trade pricing is provided by email after we review your project.");
   fireEvent.change(screen.getByLabelText("Duct size"), {
     target: { value: "6x12" },
   });
   expect(
     screen.getByText(/Standard vents: \$67.00 retail per vent/),
-  ).toHaveTextContent("Estimated standard-vent total for 10 vents: $603.00");
+  ).toHaveTextContent("Trade pricing is provided by email after we review your project.");
   expect(screen.getAllByLabelText("Finish", { exact: true })).toHaveLength(1);
   expect(screen.queryByLabelText("Finish type")).not.toBeInTheDocument();
   expect(screen.getByLabelText("Finish", { exact: true })).toHaveValue(
@@ -188,14 +188,10 @@ test("429 preserves the form and focuses the error alert", async () => {
 });
 
 
-test("Trade estimate follows tiers through 100 vents and doubles the discounted price for sliders", () => {
+test("Trade pricing is quoted by email without public discount tiers or estimates", () => {
   render(<InquiryForm trade />);
-  for (const [quantity,percent,total] of [[9,0,"$378.00"],[10,10,"$378.00"],[25,15,"$892.50"],[50,20,"$1,680.00"],[100,25,"$3,150.00"]]) {
-    fireEvent.change(screen.getByLabelText("Quantity"), {target:{value:String(quantity)}});
-    expect(screen.getByText(/Standard vents:/)).toHaveTextContent(`Trade discount (vents only): ${percent}%`);
-    expect(screen.getByText(/Standard vents:/)).toHaveTextContent(`Estimated standard-vent total for ${quantity} vents: ${total}`);
-  }
+  fireEvent.change(screen.getByLabelText("Quantity"), {target:{value:"100"}});
   fireEvent.click(screen.getByRole("checkbox", {name:/Add a shutoff slider/}));
-  expect(screen.getByText(/Standard vents:/)).toHaveTextContent("Vent unit price after discount and slider: $63.00");
-  expect(screen.getByText(/Standard vents:/)).toHaveTextContent("100 vents: $6,300.00");
+  expect(screen.getByText(/Standard vents:/)).toHaveTextContent("Trade pricing is provided by email after we review your project.");
+  expect(screen.queryByText(/Trade discount|Estimated standard-vent total|25%/)).not.toBeInTheDocument();
 });

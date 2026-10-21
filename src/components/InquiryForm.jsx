@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { quoteConfirmation, generalConfirmation } from "../data/confirmation";
 import { sizes, colors } from "../data/options";
 import { ventPrices as retailPrices } from "../data/pricing";
-import { money, ventPricing } from "../data/quoteEstimate";
+import { money } from "../data/quoteEstimate";
 import QuoteInquiryForm from "./QuoteInquiryForm";
 const MAX_BYTES = 2 * 1024 * 1024;
 
@@ -90,10 +90,6 @@ function LegacyInquiryForm({
     }
   };
   const tradeQuantity = Number(form.quantity);
-  const tradePricing = trade && Object.hasOwn(retailPrices, form.size) &&
-    Number.isInteger(tradeQuantity) && tradeQuantity >= 1 && tradeQuantity <= 10000
-      ? ventPricing({ size: form.size, quantity: tradeQuantity, slider: form.slider, trade: true })
-      : null;
   const submit = async (event) => {
     event.preventDefault();
     if (loading) return;
@@ -288,16 +284,12 @@ function LegacyInquiryForm({
               />
               <span>
                 Add a shutoff slider
-                <small>Doubles the vent price after the trade discount.</small>
+                <small>Doubles the vent price.</small>
               </span>
             </label>
             <p className="field-help" aria-live="polite">
               Standard vents: {money(retailPrices[form.size])} retail per vent.
-              {tradePricing && <> Trade discount (vents only): {tradePricing.discountPercent}%.
-                Vent unit price after discount{form.slider ? " and slider" : ""}: {money(tradePricing.unitPrice)}.
-                Estimated standard-vent total for {Number(form.quantity).toLocaleString("en-US")} vents: {money(tradePricing.ventsSubtotal)}.
-              </>}
-              {" "}Before templates, customization, powder coating, shipping, and tax. Templates are not discounted. Final pricing confirmed in your quote.
+              {" "}Trade pricing is provided by email after we review your project.
             </p>
             <label className="form-label" htmlFor="trade-finish">
               Finish
