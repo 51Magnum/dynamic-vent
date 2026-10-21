@@ -22,6 +22,11 @@ function estimate({ size, slider, quantity, template = false }) {
     total: ventsSubtotal + (template ? catalog.template.price : 0),
   };
 }
+function routeDepth(slider) {
+  return slider
+    ? catalog.routerRequirements.depths.withSlider
+    : catalog.routerRequirements.depths.ventOnly;
+}
 function templateSelection(selected) {
   return selected
     ? `Yes (${money(catalog.template.price)}${catalog.template.priceConfirmed ? "" : ", estimated"})`
@@ -31,7 +36,7 @@ function formatQuote(quote) {
   const totals = estimate(quote);
   const size = catalog.sizes.find((item) => item.label === quote.size);
   const pattern = catalog.patterns.find((item) => item.id === quote.pattern);
-  return `Size: ${quote.size} (${size.dimensions})\nPattern: ${quote.custom ? "Custom wording/design" : pattern?.label}\nCustom wording: ${quote.custom ? quote.customNotes?.trim() || "To be discussed" : "None"}\nFinish: ${quote.finishType}\nPaint color: ${quote.color}\nShutoff slider: ${quote.slider ? "Yes" : "No"}\nQuantity: ${quote.quantity}\nInstallation template: ${templateSelection(quote.template)}\nEstimated subtotal: ${money(totals.total)} before shipping, tax, powder coating, and custom-design charges.`;
+  return `Size: ${quote.size} (${size.dimensions})\nPattern: ${quote.custom ? "Custom wording/design" : pattern?.label}\nCustom wording: ${quote.custom ? quote.customNotes?.trim() || "To be discussed" : "None"}\nFinish: ${quote.finishType}\nPaint color: ${quote.color}\nShutoff slider: ${quote.slider ? "Yes" : "No"}\nRouting depth: Route ${routeDepth(quote.slider)} in deep\nQuantity: ${quote.quantity}\nInstallation template: ${templateSelection(quote.template)}${quote.template ? `\nTemplate guide: ${catalog.template.description}` : ""}\nEstimated subtotal: ${money(totals.total)} before shipping, tax, powder coating, and custom-design charges.`;
 }
 function quoteRows(quote) {
   const size = catalog.sizes.find((item) => item.label === quote.size);
@@ -46,8 +51,12 @@ function quoteRows(quote) {
     ["Finish", quote.finishType],
     ["Paint color", quote.color],
     ["Shutoff slider", quote.slider ? "Yes" : "No"],
+    ["Routing depth", `Route ${routeDepth(quote.slider)} in deep`],
     ["Quantity", quote.quantity],
     ["Installation template", templateSelection(quote.template)],
+    ...(quote.template
+      ? [["Template guide", catalog.template.description]]
+      : []),
   ];
 }
-module.exports = { estimate, formatQuote, money, quoteRows };
+module.exports = { estimate, formatQuote, money, quoteRows, routeDepth };

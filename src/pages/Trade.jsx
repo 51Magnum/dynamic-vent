@@ -1,3 +1,4 @@
+import catalog from "../data/catalog.json";
 import InquiryForm from "../components/InquiryForm";
 export default function Trade() {
   return (
@@ -20,7 +21,7 @@ export default function Trade() {
             <li>Painted or powder-coated finishes</li>
             <li>
               A reusable installation template: buy it once and keep it for
-              every job
+              every job. {catalog.template.description}
             </li>
           </ul>
           <p>

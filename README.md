@@ -221,31 +221,14 @@ merging; unit tests otherwise mock SMTP and send no mail.
 
 ## Before launch
 
-Run `npm run check:launch` before publishing. It is deliberately separate from
-`build`: builds remain available for Preview review and print a warning while
-owner decisions are incomplete. The named checks in `scripts/check-launch.cjs`
-are ready for additional launch/privacy checks later.
+Run `npm run check:launch` before publishing. It is separate from `build`.
+The final physical installation template price, router setup and both routing
+depths live in `src/data/catalog.json`. The template is sold outright, and the
+router's round sub-base sits down inside it. Shop, quote summaries and emails use
+the selected slider state to choose the routing depth. The full installation
+section and FAQ show both depths and the shared router, sub-base and bit specs.
 
-- Confirm the installation template price in `src/data/catalog.json` and set
-  `template.priceConfirmed=true`. The current amount is a placeholder, shown
-  publicly only as an estimated charge; it is added once for any vent quantity.
-- Set `template.returnTerms` to the owner's approved terms. Until then, the
-  template policy directs questions to sales. Existing vent terms are unchanged.
-- Fill the router, base plate, bit, and guide bushing specifications; remove all
-  bracketed owner placeholders and set `routerRequirements.confirmed=true`.
-  Unconfirmed or incomplete values are never rendered to visitors. The known
-  routed depth remains in the catalog and is shown on the installation page.
-- Remove obsolete rental/deposit/kit wording from non-test `src/` files. The guard
-  reports each offending file and line. This source check excludes test files.
-
-The expected current result is a nonzero exit with three outstanding decisions:
-price, template return terms, and router specifications. The installation template
-is sold outright; customers, contractors, and dealers keep it. The optional paper
-PDF link is hidden unless `printableAvailable` and `printableUrl` are set. No
-printable file or final router specification is invented by this implementation.
-
-The existing quote endpoint and email pipeline are retained. The structured
-selection now uses a `template` boolean, shared client/server estimates add the
-catalog price once, and summaries/emails contain the template choice. Previously
-opened forms without this field default to no template; displayed/server price
-differences still receive the existing warning for review.
+The price and router specifications are confirmed. The remaining launch check
+requires the owner's `template.returnTerms`; until supplied, the policy directs
+questions about returning a template to sales. Existing vent terms are unchanged.
+The guard also scans non-test source files for obsolete installation wording.

@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import RouterGuidance from "./RouterGuidance";
 import catalog from "../data/catalog.json";
-import { estimate, formatQuote, money } from "../data/quoteEstimate";
+import {
+  estimate,
+  formatQuote,
+  money,
+  routeDepth,
+} from "../data/quoteEstimate";
 import { quoteParams, saveShopWording } from "../data/quoteParams";
 import replyTime from "../data/reply-time.json";
 
@@ -27,6 +33,7 @@ function Details({ quote }) {
     ["Finish type", quote.finishType],
     ["Color", quote.color],
     ["Shutoff slider", quote.slider ? "Yes" : "No"],
+    ["Routing depth", `Route ${routeDepth(quote.slider)} in deep`],
     [
       "Installation template",
       quote.template
@@ -45,6 +52,8 @@ function Details({ quote }) {
           </div>
         ))}
       </dl>
+      <p className="field-help">{catalog.template.description}</p>
+      <RouterGuidance />
     </section>
   );
 }

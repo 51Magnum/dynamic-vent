@@ -1,9 +1,15 @@
 import { useState, useEffect } from "react";
+import RouterGuidance from "../components/RouterGuidance";
 import PatternThumbnail from "../components/PatternThumbnail";
 import { Link, useSearchParams } from "react-router-dom";
 import { colors, sizes } from "../data/options";
 import catalog from "../data/catalog.json";
-import { estimate, formatQuote, money } from "../data/quoteEstimate";
+import {
+  estimate,
+  formatQuote,
+  money,
+  routeDepth,
+} from "../data/quoteEstimate";
 import {
   defaults,
   parseQuoteParams,
@@ -270,20 +276,14 @@ export default function Shop() {
               </span>
             </label>
             <p id="template-help" className="field-help">
-              One template works for any number of vents, and it's yours to
-              keep.
+              {catalog.template.description} One template works for any number
+              of vents, and it's yours to keep.
             </p>
+            <RouterGuidance />
+            <p className="field-help">Route {routeDepth(slider)} in deep</p>
             <Link className="text-link" to="/how-it-works#router-requirements">
               Router and base plate requirements →
             </Link>
-            {catalog.template.printableAvailable &&
-              catalog.template.printableUrl && (
-                <p className="field-help">
-                  <a href={catalog.template.printableUrl}>
-                    Prefer paper? Download the free printable template (PDF)
-                  </a>
-                </p>
-              )}
           </fieldset>
           <div className="configuration-summary">
             <div>

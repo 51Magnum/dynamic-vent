@@ -44,7 +44,7 @@ const checks = [
     name: "router-specifications",
     run: ({ catalog }) => {
       const spec = catalog.routerRequirements;
-      const missing = ["router", "basePlate", "bit", "guideBushing"].filter(
+      const missing = ["router", "basePlate", "bit"].filter(
         (key) => typeof spec[key] !== "string" || !spec[key].trim(),
       );
       const placeholders = Object.values(spec).some(
@@ -53,7 +53,7 @@ const checks = [
       return spec.confirmed === true && !missing.length && !placeholders
         ? []
         : [
-            "Router specifications unconfirmed or placeholders remain: fill the router, base plate, bit and guide bushing requirements, then set confirmed=true.",
+            "Router specifications unconfirmed or placeholders remain: fill the router, base plate and bit requirements, then set confirmed=true.",
           ];
     },
   },

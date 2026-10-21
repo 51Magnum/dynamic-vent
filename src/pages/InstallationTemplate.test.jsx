@@ -5,13 +5,6 @@ import catalog from "../data/catalog.json";
 import HowItWorks from "./HowItWorks";
 import Policies from "./Policies";
 import FAQ from "./FAQ";
-jest.mock("../data/catalog.json", () =>
-  JSON.parse(JSON.stringify(jest.requireActual("../data/catalog.json"))),
-);
-const original = JSON.parse(JSON.stringify(catalog));
-beforeEach(() => {
-  Object.assign(catalog, JSON.parse(JSON.stringify(original)));
-});
 function page(element) {
   return render(
     <MemoryRouter
@@ -21,47 +14,30 @@ function page(element) {
     </MemoryRouter>,
   );
 }
-test("unconfirmed router section hides all placeholder text, even if confirmed is toggled early", () => {
-  catalog.routerRequirements.confirmed = true;
+test("recommended router setup lists all approved specifications and both depth choices", () => {
   const { container } = page(<HowItWorks />);
   const section = screen.getByRole("region", {
-    name: "Router & base plate requirements",
+    name: "Recommended router setup",
   });
-  expect(section).toHaveTextContent("Routed depth: 0.25 in.");
-  expect(section).toHaveTextContent(
-    "We're finalizing the exact router and base plate specifications.",
-  );
-  expect(container).not.toHaveTextContent("[SHANE:");
-  expect(
-    screen.getByRole("link", {
-      name: /Explore vents & the installation template/,
-    }),
-  ).toBeInTheDocument();
-});
-test("confirmed router section lists only completed owner specifications", () => {
-  catalog.routerRequirements = {
-    confirmed: true,
-    router: "Fixture router",
-    basePlate: "Fixture base plate",
-    bit: "Fixture bit",
-    guideBushing: "none",
-    routedDepthInches: 0.25,
-  };
-  page(<HowItWorks />);
-  const section = screen.getByRole("region", {
-    name: "Router & base plate requirements",
-  });
-  for (const value of [
-    "Fixture router",
-    "Fixture base plate",
-    "Fixture bit",
-    "none",
-    "Routed depth: 0.25 in.",
+  for (const field of [
+    "recommendation",
+    "router",
+    "sameBaseFits",
+    "basePlate",
+    "bit",
+    "depthGuidance",
   ])
-    expect(section).toHaveTextContent(value);
-  expect(section).not.toHaveTextContent("finalizing");
+    expect(section).toHaveTextContent(catalog.routerRequirements[field]);
+  expect(section).toHaveTextContent(
+    `Vent only: Route ${catalog.routerRequirements.depths.ventOnly} in deep.`,
+  );
+  expect(section).toHaveTextContent(
+    `Vent with shutoff slider: Route ${catalog.routerRequirements.depths.withSlider} in deep.`,
+  );
+  expect(section).toHaveTextContent(catalog.template.description);
+  expect(container).not.toHaveTextContent(/\[SHANE:|not compatible/i);
 });
-test("policy keeps vent terms and adds safe template terms with optional printable copy", () => {
+test("policy keeps vent terms and describes the physical template purchase", () => {
   const first = render(<Policies />);
   const section = first.container.querySelector("#installation-template");
   expect(section).toHaveTextContent("Installation templates are sold outright");
@@ -76,19 +52,6 @@ test("policy keeps vent terms and adds safe template terms with optional printab
     "30 days from delivery",
   );
   expect(section).not.toHaveTextContent("printable paper");
-  first.unmount();
-  catalog.template.returnTerms =
-    "Ask sales before returning your unused template.";
-  catalog.template.printableAvailable = true;
-  const second = render(<Policies />);
-  expect(
-    second.container.querySelector("#installation-template"),
-  ).toHaveTextContent(catalog.template.returnTerms);
-  expect(
-    screen.getByText(
-      "The printable paper template is free and isn't returnable.",
-    ),
-  ).toBeInTheDocument();
 });
 test("FAQ tools answer points directly to the requirements section", () => {
   page(<FAQ />);
@@ -100,4 +63,23 @@ test("FAQ tools answer points directly to the requirements section", () => {
     "href",
     "/how-it-works#router-requirements",
   );
+});
+
+test("router FAQ includes both depths and replaces the blanket-depth answer", () => {
+  page(<FAQ />);
+  const item = screen.getByText("Which router do I need?").closest("details");
+  expect(item).toHaveTextContent(catalog.routerRequirements.recommendation);
+  expect(item).toHaveTextContent(catalog.routerRequirements.basePlate);
+  expect(item).toHaveTextContent(catalog.routerRequirements.bit);
+  expect(item).toHaveTextContent(
+    `Route ${catalog.routerRequirements.depths.ventOnly} in deep`,
+  );
+  expect(item).toHaveTextContent(
+    `Route ${catalog.routerRequirements.depths.withSlider} in deep`,
+  );
+  const thickness = screen
+    .getByText("How thick are the vents?")
+    .closest("details");
+  expect(thickness).toHaveTextContent("for a vent only");
+  expect(thickness).toHaveTextContent("for a vent with the shutoff slider");
 });

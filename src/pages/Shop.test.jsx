@@ -43,7 +43,7 @@ test("adds the purchased template once alongside slider and vent quantity", () =
   expect(screen.queryByLabelText(/Installation kit/)).not.toBeInTheDocument();
   expect(
     screen.getByRole("checkbox", { name: /Add the installation template/ }),
-  ).toHaveAccessibleName(new RegExp("estimated"));
+  ).not.toHaveAccessibleName(/estimated/);
   expect(screen.queryByText(/Prefer paper/)).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("link", { name: /Request a Quote/ }));
   const inquiry = screen.getByText(/Please quote this/);
@@ -95,27 +95,38 @@ test("custom wording and powder coating reach the quote inquiry without an inven
   );
 });
 
-test("confirmed template price omits the qualifier and printable link is opt-in", () => {
-  const original = { ...catalog.template };
-  try {
-    catalog.template.priceConfirmed = true;
-    catalog.template.printableAvailable = true;
-    catalog.template.printableUrl = "/fixture-paper-template.pdf";
-    render(
-      <MemoryRouter
-        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-      >
-        <Shop />
-      </MemoryRouter>,
-    );
-    expect(
-      screen.getByRole("checkbox", { name: /Add the installation template/ }),
-    ).not.toHaveAccessibleName(/estimated/);
-    expect(screen.getByRole("link", { name: /Prefer paper/ })).toHaveAttribute(
-      "href",
-      catalog.template.printableUrl,
-    );
-  } finally {
-    Object.assign(catalog.template, original);
-  }
+test("template shows its final catalog price and follows the selected routing depth", () => {
+  render(
+    <MemoryRouter
+      future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+    >
+      <Shop />
+    </MemoryRouter>,
+  );
+  const option = screen.getByRole("checkbox", {
+    name: /Add the installation template/,
+  });
+  expect(option).toHaveAccessibleName(
+    new RegExp(catalog.template.price.toFixed(2)),
+  );
+  expect(option).not.toHaveAccessibleName(/estimated/);
+  expect(
+    screen.queryByText(/printable|paper template/i),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.getByText(
+      `Route ${catalog.routerRequirements.depths.ventOnly} in deep`,
+    ),
+  ).toBeInTheDocument();
+  fireEvent.click(
+    screen.getByRole("checkbox", { name: /Add a shutoff slider/ }),
+  );
+  expect(
+    screen.getByText(
+      `Route ${catalog.routerRequirements.depths.withSlider} in deep`,
+    ),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText(catalog.routerRequirements.recommendation),
+  ).toBeInTheDocument();
 });

@@ -33,7 +33,7 @@ export default function Policies() {
           <h2>Installation template</h2>
           <p>
             Installation templates are sold outright and are yours to keep after
-            your install.
+            your install. {catalog.template.description}
           </p>
           {typeof catalog.template.returnTerms === "string" &&
           catalog.template.returnTerms.trim() ? (
@@ -43,9 +43,6 @@ export default function Policies() {
               Questions about returning a template? Email{" "}
               <a href="mailto:sales@dynamicvent.com">sales@dynamicvent.com</a>.
             </p>
-          )}
-          {catalog.template.printableAvailable && (
-            <p>The printable paper template is free and isn't returnable.</p>
           )}
         </section>
       </div>

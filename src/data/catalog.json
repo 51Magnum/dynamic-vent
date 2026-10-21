@@ -1,5 +1,5 @@
 {
-  "_comment": "template.price is a PLACEHOLDER until priceConfirmed=true. routerRequirements values in [SHANE: …] are placeholders and must never render publicly; set confirmed=true only after filling them.",
+  "_comment": "Shared product prices, recommended router setup and routing depths. Change specifications here so every page and quote stays consistent.",
   "sizes": [
     {
       "label": "4x8",
@@ -108,17 +108,23 @@
     "id": "template",
     "label": "Installation template",
     "price": 30,
-    "priceConfirmed": false,
-    "printableAvailable": false,
-    "printableUrl": "",
-    "returnTerms": null
+    "priceConfirmed": true,
+    "returnTerms": null,
+    "description": "A physical guide that the router's 90 mm round sub-base sits down inside."
   },
   "routerRequirements": {
-    "confirmed": false,
-    "router": "[SHANE: router type/size required]",
-    "basePlate": "[SHANE: base plate / sub-base size or diameter required for the template]",
-    "bit": "[SHANE: bit type and diameter]",
-    "guideBushing": "[SHANE: guide bushing size, or 'none']",
-    "routedDepthInches": 0.25
+    "confirmed": true,
+    "recommendation": "We recommend a RIDGID or Ryobi compact router with the 90 mm round sub-base (part 519233001). The template is sized to this base.",
+    "router": "RIDGID R86044 compact router",
+    "sameBaseFits": "The same base fits RIDGID R2401 and Ryobi P601.",
+    "basePlate": "Part 519233001, round, 90 mm (3.543 in) outside diameter, 4 x M4 screws on a 55 mm square.",
+    "bit": "Bosch 85614M rabbeting bit, 1-3/8 in cut diameter, 1/2 in max cut depth, 1/4 in shank, 1/2 in bearing.",
+    "depths": {
+      "ventOnly": 0.125,
+      "withSlider": 0.25
+    },
+    "depthGuidance": "The router sits down inside the template, so don't add template thickness. Depth is measured from the bottom of the router base to the bottom of the bit.",
+    "helpBeforeEmail": "Using a different router, or have questions? Email",
+    "helpAfterEmail": "and we'll help."
   }
 }

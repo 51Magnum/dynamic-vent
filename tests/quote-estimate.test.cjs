@@ -55,8 +55,36 @@ test("estimate rejects malformed choices; quote text contains only the purchased
   const selected = formatQuote({ ...base, template: true });
   assert.ok(
     selected.includes(
-      `Installation template: Yes ($${catalog.template.price.toFixed(2)}, estimated)`,
+      `Installation template: Yes ($${catalog.template.price.toFixed(2)})`,
     ),
   );
   assert.doesNotMatch(selected, /kit|refund|deposit|rent/i);
+});
+
+test("quote text and email table use the selected routing depth and final template price", () => {
+  const { quoteRows, routeDepth } = require("../lib/quote-estimate.cjs");
+  for (const slider of [false, true]) {
+    const quote = {
+      size: "4x8",
+      slider,
+      quantity: 1,
+      template: true,
+      custom: false,
+      pattern: "Chevron",
+      finishType: "Painted (standard)",
+      color: "Brown",
+    };
+    assert.ok(
+      formatQuote(quote).includes(`Route ${routeDepth(slider)} in deep`),
+    );
+    assert.deepEqual(
+      quoteRows(quote).find(([label]) => label === "Routing depth"),
+      ["Routing depth", `Route ${routeDepth(slider)} in deep`],
+    );
+    assert.doesNotMatch(
+      formatQuote(quote),
+      /\(estimated\)|rental|deposit|printable|paper template/i,
+    );
+    assert.ok(formatQuote(quote).includes(catalog.template.description));
+  }
 });

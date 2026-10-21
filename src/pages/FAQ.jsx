@@ -1,3 +1,5 @@
+import catalog from "../data/catalog.json";
+import RouterRequirements from "../components/RouterRequirements";
 import { Link } from "react-router-dom";
 function FAQ() {
   const faqs = [
@@ -18,8 +20,15 @@ function FAQ() {
     },
     {
       question: "How thick are the vents?",
-      answer:
-        'The vents are 0.125" thick. They\'re designed to drop into a routed 0.25" deep opening, sitting flush with your hardwood floor.',
+      answer: (
+        <>
+          The vents are {catalog.routerRequirements.depths.ventOnly} in thick.
+          Route {catalog.routerRequirements.depths.ventOnly} in deep for a vent
+          only, or {catalog.routerRequirements.depths.withSlider} in deep for a
+          vent with the shutoff slider.{" "}
+          {catalog.routerRequirements.depthGuidance}
+        </>
+      ),
     },
     {
       question: "How does the airflow control work?",
@@ -48,6 +57,10 @@ function FAQ() {
           </Link>
         </>
       ),
+    },
+    {
+      question: "Which router do I need?",
+      answer: <RouterRequirements compact />,
     },
     {
       question: "Can I install it after flooring is already finished?",
@@ -103,7 +116,11 @@ function FAQ() {
         {faqs.map((faq, index) => (
           <details key={index}>
             <summary>{faq.question}</summary>
-            <p>{faq.answer}</p>
+            {faq.question === "Which router do I need?" ? (
+              faq.answer
+            ) : (
+              <p>{faq.answer}</p>
+            )}
           </details>
         ))}
       </div>

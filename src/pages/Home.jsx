@@ -1,3 +1,4 @@
+import catalog from "../data/catalog.json";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import InstallationVideo from "../components/InstallationVideo";
@@ -82,7 +83,7 @@ export default function Home() {
             />
             <figcaption>
               <span className="eyebrow">BEFORE THE VENT GOES IN</span>
-              <p>The template positions the opening for the routing step.</p>
+              <p>{catalog.template.description}</p>
             </figcaption>
           </figure>
           <figure>
