@@ -7,7 +7,7 @@ export const defaults = Object.freeze({
   color: catalog.colors[0].name,
   slider: false,
   quantity: 1,
-  kit: "none",
+  template: false,
 });
 export function parseQuoteParams(input) {
   const params = new URLSearchParams(input);
@@ -35,11 +35,7 @@ export function parseQuoteParams(input) {
     ),
     slider: params.get("slider") === "1",
     quantity: Math.max(1, Math.min(99, Number.isFinite(qty) ? qty : 1)),
-    kit: pick(
-      "kit",
-      catalog.kits.map((item) => item.id),
-      defaults.kit,
-    ),
+    template: params.get("template") === "1",
   };
 }
 export function quoteParams(quote) {
@@ -51,7 +47,7 @@ export function quoteParams(quote) {
     color: quote.color,
     slider: quote.slider ? "1" : "0",
     qty: String(quote.quantity),
-    kit: quote.kit,
+    template: quote.template ? "1" : "0",
   });
 }
 export function readShopWording() {

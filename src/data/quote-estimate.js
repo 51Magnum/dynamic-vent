@@ -3,11 +3,10 @@ const money = (value) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
     value,
   );
-function estimate({ size, slider, quantity, kit }) {
-  const option = catalog.kits.find((item) => item.id === kit);
+function estimate({ size, slider, quantity, template = false }) {
   if (
     !Object.hasOwn(catalog.ventPrices, size) ||
-    !option ||
+    typeof template !== "boolean" ||
     typeof slider !== "boolean" ||
     !Number.isInteger(quantity) ||
     quantity < 1 ||
@@ -19,22 +18,24 @@ function estimate({ size, slider, quantity, kit }) {
   return {
     unitPrice,
     ventsSubtotal,
-    kitPrice: option.price,
-    kitRefund: option.refund,
-    total: ventsSubtotal + option.price,
+    templatePrice: template ? catalog.template.price : 0,
+    total: ventsSubtotal + (template ? catalog.template.price : 0),
   };
+}
+function templateSelection(selected) {
+  return selected
+    ? `Yes (${money(catalog.template.price)}${catalog.template.priceConfirmed ? "" : ", estimated"})`
+    : "No";
 }
 function formatQuote(quote) {
   const totals = estimate(quote);
   const size = catalog.sizes.find((item) => item.label === quote.size);
   const pattern = catalog.patterns.find((item) => item.id === quote.pattern);
-  const kit = catalog.kits.find((item) => item.id === quote.kit);
-  return `Size: ${quote.size} (${size.dimensions})\nPattern: ${quote.custom ? "Custom wording/design" : pattern?.label}\nCustom wording: ${quote.custom ? quote.customNotes?.trim() || "To be discussed" : "None"}\nFinish: ${quote.finishType}\nPaint color: ${quote.color}\nShutoff slider: ${quote.slider ? "Yes" : "No"}\nQuantity: ${quote.quantity}\nInstallation kit: ${kit.label}\nEstimated subtotal: ${money(totals.total)} before shipping, tax, powder coating, and custom-design charges.${totals.kitRefund ? `\nKit refund upon return: ${money(totals.kitRefund)}` : ""}`;
+  return `Size: ${quote.size} (${size.dimensions})\nPattern: ${quote.custom ? "Custom wording/design" : pattern?.label}\nCustom wording: ${quote.custom ? quote.customNotes?.trim() || "To be discussed" : "None"}\nFinish: ${quote.finishType}\nPaint color: ${quote.color}\nShutoff slider: ${quote.slider ? "Yes" : "No"}\nQuantity: ${quote.quantity}\nInstallation template: ${templateSelection(quote.template)}\nEstimated subtotal: ${money(totals.total)} before shipping, tax, powder coating, and custom-design charges.`;
 }
 function quoteRows(quote) {
   const size = catalog.sizes.find((item) => item.label === quote.size);
   const pattern = catalog.patterns.find((item) => item.id === quote.pattern);
-  const kit = catalog.kits.find((item) => item.id === quote.kit);
   return [
     ["Size", `${quote.size} (${size.dimensions})`],
     ["Pattern", quote.custom ? "Custom wording/design" : pattern.label],
@@ -46,8 +47,7 @@ function quoteRows(quote) {
     ["Paint color", quote.color],
     ["Shutoff slider", quote.slider ? "Yes" : "No"],
     ["Quantity", quote.quantity],
-    ["Installation kit", kit.label],
-    ["Kit refund upon return", money(kit.refund)],
+    ["Installation template", templateSelection(quote.template)],
   ];
 }
 module.exports = { estimate, formatQuote, money, quoteRows };

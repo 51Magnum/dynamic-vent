@@ -13,7 +13,6 @@ function readDraft() {
   }
 }
 function Details({ quote }) {
-  const kit = catalog.kits.find((item) => item.id === quote.kit);
   const rows = [
     [
       "Size",
@@ -28,7 +27,12 @@ function Details({ quote }) {
     ["Finish type", quote.finishType],
     ["Color", quote.color],
     ["Shutoff slider", quote.slider ? "Yes" : "No"],
-    ["Installation kit", kit.label],
+    [
+      "Installation template",
+      quote.template
+        ? `Yes (${money(catalog.template.price)}${catalog.template.priceConfirmed ? "" : ", estimated"})`
+        : "No",
+    ],
   ];
   return (
     <section className="quote-order" aria-label="Configured order">
@@ -41,12 +45,6 @@ function Details({ quote }) {
           </div>
         ))}
       </dl>
-      {kit.refund > 0 && (
-        <p className="field-help">
-          {money(kit.price)} kit charge included; {money(kit.refund)} refunded
-          upon return.
-        </p>
-      )}
     </section>
   );
 }

@@ -1,5 +1,7 @@
 import InstallationVideo from "../components/InstallationVideo";
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
+import RouterRequirements from "../components/RouterRequirements";
 const steps = [
   [
     "step1-align.jpg",
@@ -23,6 +25,13 @@ const steps = [
   ],
 ];
 export default function HowItWorks() {
+  const { hash } = useLocation();
+  useEffect(() => {
+    if (hash === "#router-requirements")
+      document
+        .getElementById("router-requirements")
+        ?.scrollIntoView({ block: "start" });
+  }, [hash]);
   return (
     <div className="container section">
       <div className="page-intro">
@@ -56,9 +65,10 @@ export default function HowItWorks() {
           Talk through your project with us →
         </Link>
       </div>
+      <RouterRequirements />
       <div className="button-row">
         <Link to="/shop" className="button">
-          Explore vents & installation kits ↗
+          Explore vents & the installation template ↗
         </Link>
       </div>
     </div>

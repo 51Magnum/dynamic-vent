@@ -9,6 +9,10 @@ test("built shop is visible and useful before JavaScript or pattern images load"
     "utf8",
   );
   const document = new JSDOM(html).window.document;
+  assert.doesNotMatch(
+    html,
+    /refunded upon return|Router \+ template|\[SHANE:/i,
+  );
   assert.equal(document.querySelector("#root").dataset.prerendered, "shop");
   assert.equal(
     document.querySelector("main h1").textContent,

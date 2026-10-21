@@ -1,3 +1,4 @@
+import catalog from "../data/catalog.json";
 export default function Policies() {
   return (
     <div className="container section policy-page">
@@ -27,6 +28,25 @@ export default function Policies() {
             The warranty doesn't cover damage from improper installation,
             misuse, or normal wear on the finish.
           </p>
+        </section>
+        <section id="installation-template">
+          <h2>Installation template</h2>
+          <p>
+            Installation templates are sold outright and are yours to keep after
+            your install.
+          </p>
+          {typeof catalog.template.returnTerms === "string" &&
+          catalog.template.returnTerms.trim() ? (
+            <p>{catalog.template.returnTerms}</p>
+          ) : (
+            <p>
+              Questions about returning a template? Email{" "}
+              <a href="mailto:sales@dynamicvent.com">sales@dynamicvent.com</a>.
+            </p>
+          )}
+          {catalog.template.printableAvailable && (
+            <p>The printable paper template is free and isn't returnable.</p>
+          )}
         </section>
       </div>
     </div>

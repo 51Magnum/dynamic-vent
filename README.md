@@ -186,11 +186,11 @@ flags. Simulate SMTP failures in unit tests, or only in an isolated Preview.
 
 ## Shareable configured quotes
 
-`src/data/catalog.json` is the single size/pattern/color/finish/kit/price catalog.
+`src/data/catalog.json` is the single size/pattern/color/finish/template/price catalog.
 `options.js` and `pricing.js` retain their existing public exports. The pure estimate
 implementation lives in `src/data/quote-estimate.js` (CommonJS in a `.js` file so
 CRA bundles it as executable code), re-exported by `lib/quote-estimate.cjs` and
-`src/data/quoteEstimate.js`. Standard prices and kit refunds are unchanged.
+`src/data/quoteEstimate.js`. Vent prices and the slider multiplier are unchanged. The template is a one-time purchase.
 
 Shop URL selections are parsed against the catalog and quantities clamped to
 1–99. The initial Shop render uses defaults to match prerendered HTML, then a
@@ -210,7 +210,38 @@ No payment is collected and all subtotals exclude shipping, tax, powder coating
 and custom-design charges. Success and error focus are managed for keyboard users.
 
 Browser verification covers the production build with a saved non-default Shop
-URL (including its $532 example), clean hydration console, refresh/Back/direct
+URL (including its template-inclusive estimate), clean hydration console, refresh/Back/direct
 quote links, custom wording, and a 320px layout without horizontal overflow.
 Live delivery verification uses an owner-authorized Preview submission before
 merging; unit tests otherwise mock SMTP and send no mail.
+
+## Before launch
+
+Run `npm run check:launch` before publishing. It is deliberately separate from
+`build`: builds remain available for Preview review and print a warning while
+owner decisions are incomplete. The named checks in `scripts/check-launch.cjs`
+are ready for additional launch/privacy checks later.
+
+- Confirm the installation template price in `src/data/catalog.json` and set
+  `template.priceConfirmed=true`. The current amount is a placeholder, shown
+  publicly only as an estimated charge; it is added once for any vent quantity.
+- Set `template.returnTerms` to the owner's approved terms. Until then, the
+  template policy directs questions to sales. Existing vent terms are unchanged.
+- Fill the router, base plate, bit, and guide bushing specifications; remove all
+  bracketed owner placeholders and set `routerRequirements.confirmed=true`.
+  Unconfirmed or incomplete values are never rendered to visitors. The known
+  routed depth remains in the catalog and is shown on the installation page.
+- Remove obsolete rental/deposit/kit wording from non-test `src/` files. The guard
+  reports each offending file and line. This source check excludes test files.
+
+The expected current result is a nonzero exit with three outstanding decisions:
+price, template return terms, and router specifications. The installation template
+is sold outright; customers, contractors, and dealers keep it. The optional paper
+PDF link is hidden unless `printableAvailable` and `printableUrl` are set. No
+printable file or final router specification is invented by this implementation.
+
+The existing quote endpoint and email pipeline are retained. The structured
+selection now uses a `template` boolean, shared client/server estimates add the
+catalog price once, and summaries/emails contain the template choice. Previously
+opened forms without this field default to no template; displayed/server price
+differences still receive the existing warning for review.

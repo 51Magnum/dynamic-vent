@@ -14,7 +14,6 @@ import {
 const patterns = catalog.patterns.map((item) => item.id);
 const patternLabel = (id) =>
   catalog.patterns.find((item) => item.id === id)?.label;
-const kits = Object.fromEntries(catalog.kits.map((item) => [item.id, item]));
 export default function Shop() {
   const [params, setParams] = useSearchParams();
   // Render defaults on server and first client render, then restore the URL.
@@ -35,8 +34,16 @@ export default function Shop() {
     setWordingState(value);
     saveShopWording(value);
   };
-  const { size, pattern, custom, finishType, color, slider, quantity, kit } =
-    config;
+  const {
+    size,
+    pattern,
+    custom,
+    finishType,
+    color,
+    slider,
+    quantity,
+    template,
+  } = config;
   const setSize = (size) => update({ size });
   const setCustom = (custom) => update({ custom });
   const setPattern = (pattern) => update({ pattern, custom: false });
@@ -44,7 +51,7 @@ export default function Shop() {
   const setColor = (color) => update({ color });
   const setSlider = (slider) => update({ slider });
   const setQuantity = (quantity) => update({ quantity: Math.trunc(quantity) });
-  const setKit = (kit) => update({ kit });
+  const setTemplate = (template) => update({ template });
   const { unitPrice, total } = estimate(config);
   const quote = { ...config, customNotes: wording };
   const message = `Please quote this DynamicVent configuration:\n${formatQuote(quote)}`;
@@ -247,27 +254,36 @@ export default function Shop() {
                 )
               }
             />
-            <label className="form-label" htmlFor="kit">
-              Installation kit <span className="muted">(one per inquiry)</span>
+            <label className="check-option">
+              <input
+                type="checkbox"
+                checked={template}
+                onChange={(event) => setTemplate(event.target.checked)}
+                aria-describedby="template-help"
+              />
+              <span>
+                Add the installation template{" "}
+                <small>
+                  {money(catalog.template.price)}
+                  {catalog.template.priceConfirmed ? "" : " (estimated)"}
+                </small>
+              </span>
             </label>
-            <select
-              id="kit"
-              value={kit}
-              onChange={(e) => setKit(e.target.value)}
-            >
-              {Object.entries(kits).map(([key, item]) => (
-                <option key={key} value={key}>
-                  {item.label}
-                  {item.price ? ` — ${money(item.price)}` : ""}
-                </option>
-              ))}
-            </select>
-            {kits[kit].refund > 0 && (
-              <p className="field-help">
-                {money(kits[kit].price)} kit charge included below;{" "}
-                {money(kits[kit].refund)} refunded upon return.
-              </p>
-            )}
+            <p id="template-help" className="field-help">
+              One template works for any number of vents, and it's yours to
+              keep.
+            </p>
+            <Link className="text-link" to="/how-it-works#router-requirements">
+              Router and base plate requirements →
+            </Link>
+            {catalog.template.printableAvailable &&
+              catalog.template.printableUrl && (
+                <p className="field-help">
+                  <a href={catalog.template.printableUrl}>
+                    Prefer paper? Download the free printable template (PDF)
+                  </a>
+                </p>
+              )}
           </fieldset>
           <div className="configuration-summary">
             <div>
@@ -276,10 +292,13 @@ export default function Shop() {
               </span>
               <span>{money(unitPrice * quantity)}</span>
             </div>
-            {kits[kit].price > 0 && (
+            {template && (
               <div>
-                <span>{kits[kit].label}</span>
-                <span>{money(kits[kit].price)}</span>
+                <span>Installation template</span>
+                <span>
+                  {money(catalog.template.price)}
+                  {catalog.template.priceConfirmed ? "" : " (estimated)"}
+                </span>
               </div>
             )}
             <div className="summary-total">

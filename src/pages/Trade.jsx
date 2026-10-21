@@ -19,7 +19,8 @@ export default function Trade() {
             <li>Custom patterns or wording for a signature look</li>
             <li>Painted or powder-coated finishes</li>
             <li>
-              Router and template kits you can rent for a quick, clean install
+              A reusable installation template: buy it once and keep it for
+              every job
             </li>
           </ul>
           <p>

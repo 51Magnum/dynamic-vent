@@ -2,11 +2,13 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { MemoryRouter, Routes, Route, useLocation } from "react-router-dom";
 import Shop from "./Shop";
+import catalog from "../data/catalog.json";
+import { money } from "../data/quoteEstimate";
 function Inquiry() {
   const { state } = useLocation();
   return <pre>{state.message}</pre>;
 }
-test("includes slider, quantity and kit charge in the inquiry while keeping the return refund separate", () => {
+test("adds the purchased template once alongside slider and vent quantity", () => {
   render(
     <MemoryRouter
       initialEntries={["/shop"]}
@@ -27,16 +29,22 @@ test("includes slider, quantity and kit charge in the inquiry while keeping the 
   fireEvent.change(screen.getByLabelText("Number of vents"), {
     target: { value: "3" },
   });
-  fireEvent.change(screen.getByLabelText(/Installation kit/), {
-    target: { value: "withRouter" },
-  });
+  fireEvent.click(
+    screen.getByRole("checkbox", { name: /Add the installation template/ }),
+  );
   expect(
     screen.getByText(
       "Doubles the vent price. Manually restrict or close airflow.",
     ),
   ).toBeInTheDocument();
-  expect(screen.getByText("$532.00")).toBeInTheDocument();
-  expect(screen.getByText(/\$225.00 refunded upon return/)).toBeInTheDocument();
+  expect(
+    screen.getByText(money(47 * 2 * 3 + catalog.template.price)),
+  ).toBeInTheDocument();
+  expect(screen.queryByLabelText(/Installation kit/)).not.toBeInTheDocument();
+  expect(
+    screen.getByRole("checkbox", { name: /Add the installation template/ }),
+  ).toHaveAccessibleName(new RegExp("estimated"));
+  expect(screen.queryByText(/Prefer paper/)).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("link", { name: /Request a Quote/ }));
   const inquiry = screen.getByText(/Please quote this/);
   expect(inquiry).toHaveTextContent("Size: 6x14");
@@ -45,8 +53,11 @@ test("includes slider, quantity and kit charge in the inquiry while keeping the 
   expect(inquiry).toHaveTextContent("Paint color: Antique Pewter");
   expect(inquiry).toHaveTextContent("Shutoff slider: Yes");
   expect(inquiry).toHaveTextContent("Quantity: 3");
-  expect(inquiry).toHaveTextContent("Estimated subtotal: $532.00");
-  expect(inquiry).toHaveTextContent("Kit refund upon return: $225.00");
+  expect(inquiry).toHaveTextContent(
+    `Estimated subtotal: ${money(47 * 2 * 3 + catalog.template.price)}`,
+  );
+  expect(inquiry).toHaveTextContent("Installation template: Yes");
+  expect(inquiry).not.toHaveTextContent(/kit|refund/i);
 });
 
 test("custom wording and powder coating reach the quote inquiry without an invented upgrade price", () => {
@@ -82,4 +93,29 @@ test("custom wording and powder coating reach the quote inquiry without an inven
   expect(inquiry).toHaveTextContent(
     "Estimated subtotal: $20.00 before shipping, tax, powder coating, and custom-design charges.",
   );
+});
+
+test("confirmed template price omits the qualifier and printable link is opt-in", () => {
+  const original = { ...catalog.template };
+  try {
+    catalog.template.priceConfirmed = true;
+    catalog.template.printableAvailable = true;
+    catalog.template.printableUrl = "/fixture-paper-template.pdf";
+    render(
+      <MemoryRouter
+        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+      >
+        <Shop />
+      </MemoryRouter>,
+    );
+    expect(
+      screen.getByRole("checkbox", { name: /Add the installation template/ }),
+    ).not.toHaveAccessibleName(/estimated/);
+    expect(screen.getByRole("link", { name: /Prefer paper/ })).toHaveAttribute(
+      "href",
+      catalog.template.printableUrl,
+    );
+  } finally {
+    Object.assign(catalog.template, original);
+  }
 });

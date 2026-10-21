@@ -1,4 +1,5 @@
 {
+  "_comment": "template.price is a PLACEHOLDER until priceConfirmed=true. routerRequirements values in [SHANE: …] are placeholders and must never render publicly; set confirmed=true only after filling them.",
   "sizes": [
     {
       "label": "4x8",
@@ -94,26 +95,6 @@
     }
   ],
   "finishTypes": ["Painted (standard)", "Powder-coated"],
-  "kits": [
-    {
-      "id": "none",
-      "label": "No installation kit",
-      "price": 0,
-      "refund": 0
-    },
-    {
-      "id": "templateOnly",
-      "label": "Template only",
-      "price": 100,
-      "refund": 25
-    },
-    {
-      "id": "withRouter",
-      "label": "Router + template",
-      "price": 250,
-      "refund": 225
-    }
-  ],
   "ventPrices": {
     "4x8": 20,
     "4x10": 23,
@@ -122,5 +103,22 @@
     "6x10": 35,
     "6x12": 40,
     "6x14": 47
+  },
+  "template": {
+    "id": "template",
+    "label": "Installation template",
+    "price": 30,
+    "priceConfirmed": false,
+    "printableAvailable": false,
+    "printableUrl": "",
+    "returnTerms": null
+  },
+  "routerRequirements": {
+    "confirmed": false,
+    "router": "[SHANE: router type/size required]",
+    "basePlate": "[SHANE: base plate / sub-base size or diameter required for the template]",
+    "bit": "[SHANE: bit type and diameter]",
+    "guideBushing": "[SHANE: guide bushing size, or 'none']",
+    "routedDepthInches": 0.25
   }
 }

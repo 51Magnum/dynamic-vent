@@ -513,6 +513,9 @@ test("real PDF attachment survives validation and MIME serialization byte for by
   assert.match(recovered.toString(), /%%EOF/);
 });
 
+const catalog = require("../src/data/catalog.json");
+const { money } = require("../lib/quote-estimate.cjs");
+const expectedQuoteTotal = 47 * 2 * 3 + catalog.template.price;
 const validQuote = {
   size: "6x14",
   pattern: "Square-2",
@@ -522,8 +525,8 @@ const validQuote = {
   color: "Antique Pewter",
   slider: true,
   quantity: 3,
-  kit: "withRouter",
-  displayedTotal: 532,
+  template: true,
+  displayedTotal: expectedQuoteTotal,
 };
 test("structured quote is recomputed, emailed to both recipients and logged", async () => {
   const app = setup();
@@ -545,17 +548,26 @@ test("structured quote is recomputed, emailed to both recipients and logged", as
   assert.equal(res.code, 200);
   const internal = app.sent.find((mail) => mail.to === "sales@dynamicvent.com");
   const confirmation = app.sent.find((mail) => mail.to === valid.email);
-  assert.match(internal.text, /Server estimated subtotal: \$532.00/);
-  assert.match(internal.text, /Displayed estimated subtotal: \$532.00/);
+  assert.ok(
+    internal.text.includes(
+      `Server estimated subtotal: ${money(expectedQuoteTotal)}`,
+    ),
+  );
+  assert.ok(
+    internal.text.includes(
+      `Displayed estimated subtotal: ${money(expectedQuoteTotal)}`,
+    ),
+  );
   assert.match(internal.html, /<table/);
   assert.match(internal.html, /Square 2/);
   assert.doesNotMatch(internal.text, /differed from server/);
-  assert.match(
-    confirmation.text,
-    /Estimated subtotal \(shipping and tax TBD\): \$532.00/,
+  assert.ok(
+    confirmation.text.includes(
+      `Estimated subtotal (shipping and tax TBD): ${money(expectedQuoteTotal)}`,
+    ),
   );
   assert.equal(app.leads[0].source, "quote");
-  assert.equal(app.leads[0].quote.serverEstimate, 532);
+  assert.equal(app.leads[0].quote.serverEstimate, expectedQuoteTotal);
   assert.equal(app.leads[0].postalCode, "83651");
 });
 test("tampered displayed totals are flagged without changing the server estimate", async () => {
@@ -579,7 +591,11 @@ test("tampered displayed totals are flagged without changing the server estimate
     mail.text,
     /Displayed estimate differed from server estimate; verify before quoting/,
   );
-  assert.match(mail.text, /Server estimated subtotal: \$532.00/);
+  assert.ok(
+    mail.text.includes(
+      `Server estimated subtotal: ${money(expectedQuoteTotal)}`,
+    ),
+  );
   assert.match(mail.text, /Displayed estimated subtotal: \$1.00/);
 });
 test("invalid quote fields and ZIP are rejected before SMTP", async () => {
@@ -590,7 +606,7 @@ test("invalid quote fields and ZIP are rejected before SMTP", async () => {
     ["pattern", "custom"],
     ["color", "<script>"],
     ["finishType", "unknown"],
-    ["kit", "unknown"],
+    ["template", "unknown"],
     ["quantity", 1.5],
     ["quantity", 100],
     ["quantity", 0],

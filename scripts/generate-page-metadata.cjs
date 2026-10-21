@@ -1,5 +1,10 @@
 const fs = require("node:fs");
 const path = require("node:path");
+const catalog = require("../src/data/catalog.json");
+if (!catalog.template.priceConfirmed || !catalog.routerRequirements.confirmed)
+  console.warn(
+    "Before launch: installation template price and/or router specifications are unconfirmed. Run npm run check:launch and complete the owner decisions.",
+  );
 const pages = require("../src/data/page-meta.json");
 const base = fs.readFileSync(
   path.join(__dirname, "../build/index.html"),

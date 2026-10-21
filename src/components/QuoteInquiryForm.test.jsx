@@ -7,6 +7,8 @@ import {
 } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { MemoryRouter, Routes, Route, useLocation } from "react-router-dom";
+import catalog from "../data/catalog.json";
+import { money } from "../data/quoteEstimate";
 import Contact from "../pages/Contact";
 import Shop from "../pages/Shop";
 function Location() {
@@ -19,7 +21,7 @@ function Location() {
   );
 }
 const url =
-  "/contact?quote=1&size=6x14&pattern=Square-2&color=Antique+Pewter&slider=1&qty=3&kit=withRouter";
+  "/contact?quote=1&size=6x14&pattern=Square-2&color=Antique+Pewter&slider=1&qty=3&template=1";
 function app(entry = url) {
   return render(
     <MemoryRouter
@@ -59,13 +61,13 @@ test("direct quote URL shows the configuration, changes estimate and preserves s
   expect(details).toHaveTextContent("Square 2");
   expect(
     screen.getByRole("region", { name: "Quote estimate" }),
-  ).toHaveTextContent("$532.00");
+  ).toHaveTextContent(money(47 * 2 * 3 + catalog.template.price));
   fireEvent.change(screen.getByLabelText("Quantity"), {
     target: { value: "5" },
   });
   expect(
     screen.getByRole("region", { name: "Quote estimate" }),
-  ).toHaveTextContent("$720.00");
+  ).toHaveTextContent(money(47 * 2 * 5 + catalog.template.price));
   expect(screen.getByTestId("location")).toHaveTextContent("qty=5");
   fireEvent.click(screen.getByRole("link", { name: "Edit selections" }));
   expect(await screen.findByLabelText("Number of vents")).toHaveValue(5);
@@ -73,7 +75,9 @@ test("direct quote URL shows the configuration, changes estimate and preserves s
     "aria-pressed",
     "true",
   );
-  expect(screen.getByText("$720.00")).toBeInTheDocument();
+  expect(
+    screen.getByText(money(47 * 2 * 5 + catalog.template.price)),
+  ).toBeInTheDocument();
 });
 test("ZIP validation focuses its field and structured submission shows a focused confirmation", async () => {
   global.fetch.mockResolvedValue({
@@ -109,7 +113,11 @@ test("ZIP validation focuses its field and structured submission shows a focused
     sourcePage: "/contact",
     phone: "+1 (208) 555-0100",
     postalCode: "83651",
-    quote: { size: "6x14", quantity: 3, displayedTotal: 532 },
+    quote: {
+      size: "6x14",
+      quantity: 3,
+      displayedTotal: 47 * 2 * 3 + catalog.template.price,
+    },
   });
   expect(payload.message).toContain("Please advise.");
   expect(sessionStorage.getItem("dynamicvent-inquiry")).toBeNull();
