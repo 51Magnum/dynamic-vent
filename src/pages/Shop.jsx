@@ -10,6 +10,7 @@ import {
   money,
   routeDepth,
   templatePriceLabel,
+  templateOffer,
 } from "../data/quoteEstimate";
 import {
   defaults,
@@ -49,7 +50,6 @@ export default function Shop() {
     color,
     slider,
     quantity,
-    template,
   } = config;
   const setSize = (size) => update({ size });
   const setCustom = (custom) => update({ custom });
@@ -60,6 +60,7 @@ export default function Shop() {
   const setQuantity = (quantity) => update({ quantity: Math.trunc(quantity) });
   const setTemplate = (template) => update({ template });
   const { unitPrice, templatePrice, total } = estimate(config);
+  const offer = templateOffer(config);
   const quote = { ...config, customNotes: wording };
   const message = `Please quote this DynamicVent configuration:\n${formatQuote(quote)}`;
   return (
@@ -257,17 +258,23 @@ export default function Shop() {
               <label className="check-option template-choice__select">
                 <input
                   type="checkbox"
-                  checked={template}
+                  checked={offer.included}
+                  disabled={offer.free}
                   onChange={(event) => setTemplate(event.target.checked)}
                   aria-describedby="template-help"
                 />
                 <span className="template-choice__heading">
-                  <strong>Add the installation template set</strong>
+                  <strong>{offer.free ? "Installation template set included" : "Add the installation template set"}</strong>
                   <span className="template-choice__price">
-                    {templatePriceLabel(size)}
+                    {offer.free ? <>
+                      <s>{templatePriceLabel(size)}</s>{" "}
+                      Free ({catalog.template.freeMinimumQuantity}+ vents) — {money(0)}
+                    </> : templatePriceLabel(size)}
                   </span>
                 </span>
               </label>
+              <p className="field-help">{catalog.template.promotionCopy}</p>
+              {offer.upsell && <p className="field-help" role="status">{offer.upsell}</p>}
               <div className="template-choice__intro">
                 <img
                   src="/images/steps/step3-route.webp"
@@ -300,14 +307,20 @@ export default function Shop() {
               </span>
               <span>{money(unitPrice * quantity)}</span>
             </div>
-            {template && (
+            {offer.included && (
               <div>
                 <span>Installation template set ({size})</span>
                 <span>
+                  {offer.free && <>
+                    <s>{money(offer.normalPrice)}</s>{" "}
+                    Free ({catalog.template.freeMinimumQuantity}+ vents){" "}
+                  </>}
                   {money(templatePrice)}
                 </span>
               </div>
             )}
+            <p className="field-help">{catalog.template.promotionCopy}</p>
+            {offer.upsell && <p className="field-help">{offer.upsell}</p>}
             <div className="summary-total">
               <span>Estimated subtotal</span>
               <strong>{money(total)}</strong>

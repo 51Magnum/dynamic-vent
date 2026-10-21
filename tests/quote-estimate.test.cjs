@@ -2,11 +2,11 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const { estimate, formatQuote } = require("../lib/quote-estimate.cjs");
 const catalog = require("../src/data/catalog.json");
-test("template is charged once across sizes, quantities and slider choices", () => {
+test("template charge follows the six-vent threshold across sizes and slider choices", () => {
   for (const size of catalog.sizes)
     for (const slider of [false, true])
       for (const template of [false, true])
-        for (const quantity of [1, 3, 10, 99]) {
+        for (const quantity of [1, 3, 4, 5, 6, 7, 12, 99]) {
           const result = estimate({
             size: size.label,
             slider,
@@ -17,8 +17,8 @@ test("template is charged once across sizes, quantities and slider choices", () 
           assert.deepEqual(result, {
             unitPrice: unit,
             ventsSubtotal: unit * quantity,
-            templatePrice: template ? catalog.templatePrices[size.label] : 0,
-            total: unit * quantity + (template ? catalog.templatePrices[size.label] : 0),
+            templatePrice: template && quantity < 6 ? catalog.templatePrices[size.label] : 0,
+            total: unit * quantity + (template && quantity < 6 ? catalog.templatePrices[size.label] : 0),
           });
         }
 });
@@ -96,7 +96,7 @@ test("approved template map stays size-specific in quote text and email rows", (
   assert.deepEqual(catalog.templatePrices, expected);
   assert.equal(templatePriceLabel(), "Templates from $45");
   for (const [size, price] of Object.entries(expected)) {
-    const quote = { size, pattern:"Chevron", slider:false, quantity:99, template:true };
+    const quote = { size, pattern:"Chevron", slider:false, quantity:5, template:true };
     assert.equal(estimate(quote).templatePrice, price);
     assert.ok(formatQuote(quote).includes(`Installation template: Yes ($${price.toFixed(2)})`));
     assert.deepEqual(quoteRows(quote).find(([label]) => label === "Installation template"), ["Installation template", `Yes ($${price.toFixed(2)})`]);
@@ -132,5 +132,33 @@ test("trade templates remain full price at every tier and retail totals stay und
       assert.equal(trade.total,trade.ventsSubtotal+catalog.templatePrices[size]);
       if(quantity<100) assert.equal(estimate(config).unitPrice,catalog.ventPrices[size]*2);
     }
+  }
+});
+
+
+test("free templates use each size's own quantity, count sliders as one vent, and never affect Trade", () => {
+  const {templateOffer,templateSelection,quoteRows}=require("../lib/quote-estimate.cjs");
+  for (const size of Object.keys(catalog.templatePrices)) {
+    for (const slider of [false,true]) {
+      const config={size,slider,pattern:"Chevron",template:false};
+      assert.equal(templateOffer({...config,quantity:4}).upsell,`Add 2 more ${size} vents for a free template.`);
+      assert.equal(templateOffer({...config,quantity:5}).upsell,`Add 1 more ${size} vents for a free template.`);
+      for (const quantity of [6,7,12,99]) {
+        const quote={...config,quantity};
+        const offer=templateOffer(quote);
+        assert.equal(offer.free,true);
+        assert.equal(offer.included,true);
+        assert.equal(estimate(quote).templatePrice,0);
+        assert.equal(quoteRows(quote).filter(([label])=>label==="Installation template").length,1);
+        assert.ok(templateSelection(quote).includes("Free (6+ vents); $0.00 total"));
+      }
+      assert.equal(estimate({...config,quantity:5,template:true}).templatePrice,catalog.templatePrices[size]);
+      assert.equal(estimate({...config,quantity:6,template:true,trade:true}).templatePrice,catalog.templatePrices[size]);
+    }
+  }
+  // Six vents split between two sizes do not qualify either size.
+  for (const size of ["4x8","6x14"]) {
+    assert.equal(templateOffer({size,quantity:3}).free,false);
+    assert.equal(estimate({size,quantity:3,slider:true,template:true}).templatePrice,catalog.templatePrices[size]);
   }
 });

@@ -123,6 +123,8 @@
     "id": "template",
     "label": "Installation template set (Guide + Alignment Guide)",
     "priceConfirmed": true,
+    "freeMinimumQuantity": 6,
+    "promotionCopy": "Free template with 6+ of the same size vent.",
     "returnTerms": null,
     "description": "A physical template set (Guide + Alignment Guide). The router's 90 mm round sub-base sits down inside the guide.",
     "sizeNote": "Each vent size needs its own template set."

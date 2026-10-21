@@ -192,3 +192,16 @@ test("typed quote fields survive refresh without turning a general inquiry into 
     screen.getByRole("button", { name: /Send your inquiry/ }),
   ).toBeInTheDocument();
 });
+
+
+test("quote quantity changes cross the free-template threshold without losing the offer on direct URLs", () => {
+  app("/contact?quote=1&size=6x14&qty=5&template=0");
+  const details=screen.getByRole("region",{name:"Configured order"});
+  expect(details).toHaveTextContent("Add 1 more 6x14 vents for a free template.");
+  fireEvent.change(screen.getByLabelText("Quantity"),{target:{value:"6"}});
+  expect(details).toHaveTextContent("normal price $69.00; Free (6+ vents); $0.00 total");
+  expect(screen.getByRole("region",{name:"Quote estimate"})).toHaveTextContent(money(catalog.ventPrices["6x14"]*6));
+  fireEvent.change(screen.getByLabelText("Quantity"),{target:{value:"5"}});
+  expect(details).not.toHaveTextContent("Free (6+ vents)");
+  expect(details).toHaveTextContent("Add 1 more 6x14 vents for a free template.");
+});

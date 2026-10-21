@@ -683,8 +683,8 @@ test("both emails charge the selected size template once at full price", async (
   for (const [size, price] of Object.entries(catalog.templatePrices)) {
     const app = setup();
     const res = response();
-    const total = catalog.ventPrices[size] * 2 * 10 + price;
-    await app.handler({method:"POST", body:{...valid, inquiryType:"quote", postalCode:"83651", quote:{...validQuote,size,quantity:10,displayedTotal:total}}}, res);
+    const total = catalog.ventPrices[size] * 2 * 5 + price;
+    await app.handler({method:"POST", body:{...valid, inquiryType:"quote", postalCode:"83651", quote:{...validQuote,size,quantity:5,displayedTotal:total}}}, res);
     assert.equal(res.code, 200);
     assert.equal(app.sent.length, 2);
     for (const mail of app.sent) {
@@ -722,7 +722,25 @@ test("invalid trade pricing is rejected and retail quotes cannot claim a trade t
     assert.equal(app.sent.length,0);
   }
   const app=setup(),res=response();
-  await app.handler({method:"POST",body:{...valid,inquiryType:"quote",postalCode:"83651",quote:{...validQuote,quantity:25,trade:true,displayedTotal:catalog.ventPrices["6x14"]*2*25+catalog.templatePrices["6x14"]}}},res);
+  await app.handler({method:"POST",body:{...valid,inquiryType:"quote",postalCode:"83651",quote:{...validQuote,quantity:25,trade:true,displayedTotal:catalog.ventPrices["6x14"]*2*25}}},res);
   assert.equal(res.code,200);
-  assert.equal(app.leads[0].quote.serverEstimate,catalog.ventPrices["6x14"]*2*25+catalog.templatePrices["6x14"]);
+  assert.equal(app.leads[0].quote.serverEstimate,catalog.ventPrices["6x14"]*2*25);
+});
+
+
+test("qualifying quotes include exactly one free size-specific template in both emails without opting in", async () => {
+  for (const size of Object.keys(catalog.templatePrices)) {
+    for (const slider of [false,true]) {
+      const app=setup(),res=response();
+      const total=catalog.ventPrices[size]*(slider?2:1)*6;
+      await app.handler({method:"POST",body:{...valid,inquiryType:"quote",postalCode:"83651",quote:{...validQuote,size,slider,quantity:6,template:false,displayedTotal:total}}},res);
+      assert.equal(res.code,200);
+      assert.equal(app.leads[0].quote.serverEstimate,total);
+      for (const mail of app.sent) {
+        assert.ok(mail.text.includes(`${size} set, normal price ${money(catalog.templatePrices[size])}; Free (6+ vents); $0.00 total`));
+        assert.ok(mail.html.includes("Free (6+ vents)"));
+        assert.ok(mail.text.includes(money(total)));
+      }
+    }
+  }
 });

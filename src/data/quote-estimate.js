@@ -28,6 +28,27 @@ function ventPricing({ size, quantity, slider = false, trade = false }) {
     ventsSubtotal: Math.round(unitPrice * quantity * 100) / 100,
   };
 }
+// Each configured line contains one size. Never total quantities across sizes.
+function templateOffer({ size, quantity, template = false, trade = false }) {
+  const normalPrice = catalog.templatePrices[size];
+  const free = !trade && quantity >= catalog.template.freeMinimumQuantity;
+  const included = template || free;
+  return {
+    free,
+    included,
+    normalPrice,
+    price: included && !free ? normalPrice : 0,
+    upsell: !trade && quantity >= 4 && quantity < catalog.template.freeMinimumQuantity
+      ? `Add ${catalog.template.freeMinimumQuantity - quantity} more ${size} vents for a free template.`
+      : "",
+  };
+}
+function templateSelection(quote) {
+  const offer = templateOffer(quote);
+  if (offer.free)
+    return `Yes — ${quote.size} set, normal price ${money(offer.normalPrice)}; Free (${catalog.template.freeMinimumQuantity}+ vents); ${money(0)} total`;
+  return offer.included ? `Yes (${money(offer.normalPrice)})` : "No";
+}
 function estimate({ size, slider, quantity, template = false, trade = false }) {
   if (
     !Object.hasOwn(catalog.ventPrices, size) ||
@@ -39,11 +60,12 @@ function estimate({ size, slider, quantity, template = false, trade = false }) {
   )
     throw new RangeError("Invalid estimate configuration");
   const { unitPrice, ventsSubtotal } = ventPricing({ size, quantity, slider, trade });
+  const offer = templateOffer({ size, quantity, template, trade });
   return {
     unitPrice,
     ventsSubtotal,
-    templatePrice: template ? catalog.templatePrices[size] : 0,
-    total: ventsSubtotal + (template ? catalog.templatePrices[size] : 0),
+    templatePrice: offer.price,
+    total: ventsSubtotal + offer.price,
   };
 }
 function formatTradePricing(config) {
@@ -63,16 +85,11 @@ function routeDepth(slider) {
     ? catalog.routerRequirements.depths.withSlider
     : catalog.routerRequirements.depths.ventOnly;
 }
-function templateSelection(selected, size) {
-  return selected
-    ? `Yes (${money(catalog.templatePrices[size])})`
-    : "No";
-}
 function formatQuote(quote) {
   const totals = estimate(quote);
   const size = catalog.sizes.find((item) => item.label === quote.size);
   const pattern = catalog.patterns.find((item) => item.id === quote.pattern);
-  return `Size: ${quote.size} (${size.dimensions})\nPattern: ${quote.custom ? "Custom wording/design" : pattern?.label}\nCustom wording: ${quote.custom ? quote.customNotes?.trim() || "To be discussed" : "None"}\nFinish: ${quote.finishType}\nPaint color: ${quote.color}\nShutoff slider: ${quote.slider ? "Yes" : "No"}\nRouting depth: Route ${routeDepth(quote.slider)} in deep\nQuantity: ${quote.quantity}\nInstallation template: ${templateSelection(quote.template, quote.size)}${quote.template ? `\nTemplate guide: ${catalog.template.description}` : ""}\nEstimated subtotal: ${money(totals.total)} before shipping, tax, powder coating, and custom-design charges.`;
+  return `Size: ${quote.size} (${size.dimensions})\nPattern: ${quote.custom ? "Custom wording/design" : pattern?.label}\nCustom wording: ${quote.custom ? quote.customNotes?.trim() || "To be discussed" : "None"}\nFinish: ${quote.finishType}\nPaint color: ${quote.color}\nShutoff slider: ${quote.slider ? "Yes" : "No"}\nRouting depth: Route ${routeDepth(quote.slider)} in deep\nQuantity: ${quote.quantity}\nInstallation template: ${templateSelection(quote)}${templateOffer(quote).included ? `\nTemplate guide: ${catalog.template.description}` : ""}\nEstimated subtotal: ${money(totals.total)} before shipping, tax, powder coating, and custom-design charges.`;
 }
 function quoteRows(quote) {
   const size = catalog.sizes.find((item) => item.label === quote.size);
@@ -89,10 +106,10 @@ function quoteRows(quote) {
     ["Shutoff slider", quote.slider ? "Yes" : "No"],
     ["Routing depth", `Route ${routeDepth(quote.slider)} in deep`],
     ["Quantity", quote.quantity],
-    ["Installation template", templateSelection(quote.template, quote.size)],
-    ...(quote.template
+    ["Installation template", templateSelection(quote)],
+    ...(templateOffer(quote).included
       ? [["Template guide", catalog.template.description]]
       : []),
   ];
 }
-module.exports = { estimate, formatQuote, money, quoteRows, routeDepth, templatePriceLabel, tradeDiscountPercent, ventPricing, formatTradePricing };
+module.exports = { estimate, formatQuote, money, quoteRows, routeDepth, templatePriceLabel, tradeDiscountPercent, ventPricing, formatTradePricing, templateOffer, templateSelection };

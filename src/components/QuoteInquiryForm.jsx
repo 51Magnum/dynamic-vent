@@ -7,6 +7,8 @@ import {
   formatQuote,
   money,
   routeDepth,
+  templateOffer,
+  templateSelection,
 } from "../data/quoteEstimate";
 import { quoteParams, saveShopWording } from "../data/quoteParams";
 import replyTime from "../data/reply-time.json";
@@ -36,9 +38,7 @@ function Details({ quote }) {
     ["Routing depth", `Route ${routeDepth(quote.slider)} in deep`],
     [
       "Installation template",
-      quote.template
-        ? `Yes (${money(catalog.templatePrices[quote.size])})`
-        : "No",
+      templateSelection(quote),
     ],
   ];
   return (
@@ -55,6 +55,8 @@ function Details({ quote }) {
       <p className="field-help">
         {catalog.template.description} {catalog.template.sizeNote}
       </p>
+      <p className="field-help">{catalog.template.promotionCopy}</p>
+      {templateOffer(quote).upsell && <p className="field-help" role="status">{templateOffer(quote).upsell}</p>}
       <RouterGuidance />
     </section>
   );

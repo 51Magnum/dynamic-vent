@@ -1051,7 +1051,7 @@ select {
 .template-choice__select { min-height: 44px; align-items: center; margin-bottom: 16px; }
 .template-choice__heading { display: flex; justify-content: space-between; align-items: center; gap: 14px; width: 100%; }
 .template-choice__heading strong { font-size: .95rem; font-weight: 600; line-height: 1.5; }
-.template-choice__price { font-family: var(--serif); font-size: 1.5rem; white-space: nowrap; }
+.template-choice__price { font-family: var(--serif); font-size: 1.5rem; white-space: normal; }
 .template-choice__intro { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 18px; align-items: start; }
 .template-choice__intro img { width: 112px; height: 94px; object-fit: cover; object-position: 35% center; }
 .template-choice__intro .field-help { margin: 0; line-height: 1.75; }

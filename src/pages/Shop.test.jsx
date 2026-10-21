@@ -137,12 +137,36 @@ test("template price and subtotal follow every size selection without multiplyin
   const option = screen.getByRole("checkbox", {name:/Add the installation template/});
   expect(option).toHaveAccessibleName(/\$45\.00/);
   fireEvent.click(option);
-  fireEvent.change(screen.getByLabelText("Number of vents"), {target:{value:"10"}});
+  fireEvent.change(screen.getByLabelText("Number of vents"), {target:{value:"5"}});
   for (const [size, price] of Object.entries(catalog.templatePrices)) {
     fireEvent.click(screen.getByRole("button", {name:new RegExp(size)}));
     expect(option).toHaveAccessibleName(new RegExp(price.toFixed(2)));
-    expect(screen.getByText(money(catalog.ventPrices[size]*10+price))).toBeInTheDocument();
+    expect(screen.getByText(money(catalog.ventPrices[size]*5+price))).toBeInTheDocument();
     expect(screen.getByText(`Installation template set (${size})`)).toBeInTheDocument();
   }
   expect(screen.getByText(/Each vent size needs its own template set/)).toBeInTheDocument();
+});
+
+
+test("Shop includes a free template at six and reverts to the selected size price below six", () => {
+  render(<MemoryRouter future={{v7_startTransition:true,v7_relativeSplatPath:true}}><Shop /></MemoryRouter>);
+  const quantity=screen.getByLabelText("Number of vents");
+  fireEvent.change(quantity,{target:{value:"4"}});
+  expect(screen.getAllByText("Add 2 more 4x8 vents for a free template.")).toHaveLength(2);
+  fireEvent.change(quantity,{target:{value:"5"}});
+  expect(screen.getAllByText("Add 1 more 4x8 vents for a free template.")).toHaveLength(2);
+  fireEvent.click(screen.getByRole("checkbox",{name:/Add the installation template/}));
+  expect(screen.getByText(money(catalog.ventPrices["4x8"]*5+catalog.templatePrices["4x8"]))).toBeInTheDocument();
+  fireEvent.change(quantity,{target:{value:"6"}});
+  const included=screen.getByRole("checkbox",{name:/Installation template set included/});
+  expect(included).toBeChecked();
+  expect(included).toBeDisabled();
+  expect(included).toHaveAccessibleName(/Free \(6\+ vents\).*\$0.00/);
+  expect(screen.getAllByText(money(catalog.ventPrices["4x8"]*6))).toHaveLength(2);
+  fireEvent.click(screen.getByRole("button",{name:/6x14/}));
+  expect(included).toHaveAccessibleName(/69.00/);
+  expect(screen.getAllByText(money(catalog.ventPrices["6x14"]*6))).toHaveLength(2);
+  fireEvent.change(quantity,{target:{value:"5"}});
+  expect(screen.getByRole("checkbox",{name:/Add the installation template/})).not.toBeDisabled();
+  expect(screen.getByText(money(catalog.ventPrices["6x14"]*5+catalog.templatePrices["6x14"]))).toBeInTheDocument();
 });
