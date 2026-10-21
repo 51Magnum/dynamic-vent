@@ -49,9 +49,9 @@ function FAQ() {
       question: "Do I need special tools?",
       answer: (
         <>
-          Yes. A router is required to cut the flush-fit cavity, along with one
-          DynamicVent installation template (sold separately; one template works
-          for every vent).{" "}
+          Yes. A router is required to cut the flush-fit cavity, along with a
+          DynamicVent installation template set (sold separately).{" "}
+          {catalog.template.sizeNote}{" "}
           <Link to="/how-it-works#router-requirements">
             See the router and base plate requirements on our installation page.
           </Link>

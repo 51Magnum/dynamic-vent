@@ -9,6 +9,7 @@ import {
   formatQuote,
   money,
   routeDepth,
+  templatePriceLabel,
 } from "../data/quoteEstimate";
 import {
   defaults,
@@ -24,9 +25,11 @@ export default function Shop() {
   const [params, setParams] = useSearchParams();
   // Render defaults on server and first client render, then restore the URL.
   const [config, setConfig] = useState(defaults);
+  const [hasSelectedSize, setHasSelectedSize] = useState(false);
   const [wording, setWordingState] = useState("");
   useEffect(() => {
     setConfig(parseQuoteParams(params));
+    setHasSelectedSize(Object.hasOwn(catalog.templatePrices, params.get("size")));
   }, [params]);
   useEffect(() => {
     setWordingState(readShopWording());
@@ -58,7 +61,7 @@ export default function Shop() {
   const setSlider = (slider) => update({ slider });
   const setQuantity = (quantity) => update({ quantity: Math.trunc(quantity) });
   const setTemplate = (template) => update({ template });
-  const { unitPrice, total } = estimate(config);
+  const { unitPrice, templatePrice, total } = estimate(config);
   const quote = { ...config, customNotes: wording };
   const message = `Please quote this DynamicVent configuration:\n${formatQuote(quote)}`;
   return (
@@ -261,9 +264,9 @@ export default function Shop() {
                   aria-describedby="template-help"
                 />
                 <span className="template-choice__heading">
-                  <strong>Add the installation template</strong>
+                  <strong>Add the installation template set</strong>
                   <span className="template-choice__price">
-                    {money(catalog.template.price)}
+                    {templatePriceLabel(hasSelectedSize ? size : undefined)}
                   </span>
                 </span>
               </label>
@@ -276,8 +279,7 @@ export default function Shop() {
                   height="448"
                 />
                 <p id="template-help" className="field-help">
-                  {catalog.template.description} One template works for any
-                  number of vents, and it's yours to keep.
+                  {catalog.template.description} {catalog.template.sizeNote}
                 </p>
               </div>
               <p className="route-depth">Route {routeDepth(slider)} in deep</p>
@@ -302,10 +304,9 @@ export default function Shop() {
             </div>
             {template && (
               <div>
-                <span>Installation template</span>
+                <span>Installation template set ({size})</span>
                 <span>
-                  {money(catalog.template.price)}
-                  {catalog.template.priceConfirmed ? "" : " (estimated)"}
+                  {money(templatePrice)}
                 </span>
               </div>
             )}

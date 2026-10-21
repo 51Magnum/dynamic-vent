@@ -37,7 +37,7 @@ function Details({ quote }) {
     [
       "Installation template",
       quote.template
-        ? `Yes (${money(catalog.template.price)}${catalog.template.priceConfirmed ? "" : ", estimated"})`
+        ? `Yes (${money(catalog.templatePrices[quote.size])})`
         : "No",
     ],
   ];
@@ -52,7 +52,9 @@ function Details({ quote }) {
           </div>
         ))}
       </dl>
-      <p className="field-help">{catalog.template.description}</p>
+      <p className="field-help">
+        {catalog.template.description} {catalog.template.sizeNote}
+      </p>
       <RouterGuidance />
     </section>
   );

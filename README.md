@@ -194,7 +194,7 @@ flags. Simulate SMTP failures in unit tests, or only in an isolated Preview.
 `options.js` and `pricing.js` retain their existing public exports. The pure estimate
 implementation lives in `src/data/quote-estimate.js` (CommonJS in a `.js` file so
 CRA bundles it as executable code), re-exported by `lib/quote-estimate.cjs` and
-`src/data/quoteEstimate.js`. Vent prices and the slider multiplier are unchanged. The template is a one-time purchase.
+`src/data/quoteEstimate.js`. Vent prices and the slider multiplier are unchanged. Template sets are size-specific, purchased once per configured size; `templatePrices` next to `ventPrices` holds their final prices. Template charges are separate from vent quantities and are never discounted.
 
 Shop URL selections are parsed against the catalog and quantities clamped to
 1–99. The initial Shop render uses defaults to match prerendered HTML, then a
@@ -222,7 +222,7 @@ merging; unit tests otherwise mock SMTP and send no mail.
 ## Before launch
 
 Run `npm run check:launch` before publishing. It is separate from `build`.
-The final physical installation template price, router setup and both routing
+The final physical installation template prices by size, router setup and both routing
 depths live in `src/data/catalog.json`. The template is sold outright, and the
 router's round sub-base sits down inside it. Shop, quote summaries and emails use
 the selected slider state to choose the routing depth. The full installation

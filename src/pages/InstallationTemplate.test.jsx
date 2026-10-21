@@ -57,7 +57,7 @@ test("FAQ tools answer points directly to the requirements section", () => {
   page(<FAQ />);
   const item = screen.getByText("Do I need special tools?").closest("details");
   expect(item).toHaveTextContent(
-    "one DynamicVent installation template (sold separately; one template works for every vent)",
+    "Each vent size needs its own template set.",
   );
   expect(within(item).getByRole("link", { hidden: true })).toHaveAttribute(
     "href",

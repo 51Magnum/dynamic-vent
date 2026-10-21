@@ -17,8 +17,8 @@ test("template is charged once across sizes, quantities and slider choices", () 
           assert.deepEqual(result, {
             unitPrice: unit,
             ventsSubtotal: unit * quantity,
-            templatePrice: template ? catalog.template.price : 0,
-            total: unit * quantity + (template ? catalog.template.price : 0),
+            templatePrice: template ? catalog.templatePrices[size.label] : 0,
+            total: unit * quantity + (template ? catalog.templatePrices[size.label] : 0),
           });
         }
 });
@@ -55,7 +55,7 @@ test("estimate rejects malformed choices; quote text contains only the purchased
   const selected = formatQuote({ ...base, template: true });
   assert.ok(
     selected.includes(
-      `Installation template: Yes ($${catalog.template.price.toFixed(2)})`,
+      `Installation template: Yes ($${catalog.templatePrices[base.size].toFixed(2)})`,
     ),
   );
   assert.doesNotMatch(selected, /kit|refund|deposit|rent/i);
@@ -86,5 +86,19 @@ test("quote text and email table use the selected routing depth and final templa
       /\(estimated\)|rental|deposit|printable|paper template/i,
     );
     assert.ok(formatQuote(quote).includes(catalog.template.description));
+  }
+});
+
+
+test("approved template map stays size-specific in quote text and email rows", () => {
+  const { quoteRows, templatePriceLabel } = require("../lib/quote-estimate.cjs");
+  const expected = { "4x8":45, "4x10":49, "4x12":55, "4x14":59, "6x10":59, "6x12":65, "6x14":69 };
+  assert.deepEqual(catalog.templatePrices, expected);
+  assert.equal(templatePriceLabel(), "Templates from $45");
+  for (const [size, price] of Object.entries(expected)) {
+    const quote = { size, pattern:"Chevron", slider:false, quantity:99, template:true };
+    assert.equal(estimate(quote).templatePrice, price);
+    assert.ok(formatQuote(quote).includes(`Installation template: Yes ($${price.toFixed(2)})`));
+    assert.deepEqual(quoteRows(quote).find(([label]) => label === "Installation template"), ["Installation template", `Yes ($${price.toFixed(2)})`]);
   }
 });

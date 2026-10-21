@@ -104,13 +104,22 @@
     "6x12": 40,
     "6x14": 47
   },
+  "templatePrices": {
+    "4x8": 45,
+    "4x10": 49,
+    "4x12": 55,
+    "4x14": 59,
+    "6x10": 59,
+    "6x12": 65,
+    "6x14": 69
+  },
   "template": {
     "id": "template",
-    "label": "Installation template",
-    "price": 30,
+    "label": "Installation template set (Guide + Alignment Guide)",
     "priceConfirmed": true,
     "returnTerms": null,
-    "description": "A physical guide that the router's 90 mm round sub-base sits down inside."
+    "description": "A physical template set (Guide + Alignment Guide). The router's 90 mm round sub-base sits down inside the guide.",
+    "sizeNote": "Each vent size needs its own template set."
   },
   "routerRequirements": {
     "confirmed": true,

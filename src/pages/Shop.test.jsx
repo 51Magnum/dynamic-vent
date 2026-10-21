@@ -38,7 +38,7 @@ test("adds the purchased template once alongside slider and vent quantity", () =
     ),
   ).toBeInTheDocument();
   expect(
-    screen.getByText(money(47 * 2 * 3 + catalog.template.price)),
+    screen.getByText(money(47 * 2 * 3 + catalog.templatePrices["6x14"])),
   ).toBeInTheDocument();
   expect(screen.queryByLabelText(/Installation kit/)).not.toBeInTheDocument();
   expect(
@@ -54,7 +54,7 @@ test("adds the purchased template once alongside slider and vent quantity", () =
   expect(inquiry).toHaveTextContent("Shutoff slider: Yes");
   expect(inquiry).toHaveTextContent("Quantity: 3");
   expect(inquiry).toHaveTextContent(
-    `Estimated subtotal: ${money(47 * 2 * 3 + catalog.template.price)}`,
+    `Estimated subtotal: ${money(47 * 2 * 3 + catalog.templatePrices["6x14"])}`,
   );
   expect(inquiry).toHaveTextContent("Installation template: Yes");
   expect(inquiry).not.toHaveTextContent(/kit|refund/i);
@@ -107,7 +107,7 @@ test("template shows its final catalog price and follows the selected routing de
     name: /Add the installation template/,
   });
   expect(option).toHaveAccessibleName(
-    new RegExp(catalog.template.price.toFixed(2)),
+    /Templates from \$45/,
   );
   expect(option).not.toHaveAccessibleName(/estimated/);
   expect(
@@ -129,4 +129,20 @@ test("template shows its final catalog price and follows the selected routing de
   expect(
     screen.getByText(catalog.routerRequirements.recommendation),
   ).toBeInTheDocument();
+});
+
+
+test("template price and subtotal follow every size selection without multiplying templates", () => {
+  render(<MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><Shop /></MemoryRouter>);
+  const option = screen.getByRole("checkbox", {name:/Add the installation template/});
+  expect(option).toHaveAccessibleName(/Templates from \$45/);
+  fireEvent.click(option);
+  fireEvent.change(screen.getByLabelText("Number of vents"), {target:{value:"10"}});
+  for (const [size, price] of Object.entries(catalog.templatePrices)) {
+    fireEvent.click(screen.getByRole("button", {name:new RegExp(size)}));
+    expect(option).toHaveAccessibleName(new RegExp(price.toFixed(2)));
+    expect(screen.getByText(money(catalog.ventPrices[size]*10+price))).toBeInTheDocument();
+    expect(screen.getByText(`Installation template set (${size})`)).toBeInTheDocument();
+  }
+  expect(screen.getByText(/Each vent size needs its own template set/)).toBeInTheDocument();
 });

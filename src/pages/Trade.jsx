@@ -20,8 +20,8 @@ export default function Trade() {
             <li>Custom patterns or wording for a signature look</li>
             <li>Painted or powder-coated finishes</li>
             <li>
-              A reusable installation template: buy it once and keep it for
-              every job. {catalog.template.description}
+              A reusable installation template set, sold outright.{" "}
+              {catalog.template.sizeNote} {catalog.template.description}
             </li>
           </ul>
           <p>

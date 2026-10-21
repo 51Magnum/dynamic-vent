@@ -29,7 +29,7 @@ const checks = [
       catalog.template.priceConfirmed === true
         ? []
         : [
-            "Template price unconfirmed: confirm template.price and set priceConfirmed=true.",
+            "Template price unconfirmed: confirm templatePrices by size and set priceConfirmed=true.",
           ],
   },
   {

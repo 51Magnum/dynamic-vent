@@ -515,7 +515,7 @@ test("real PDF attachment survives validation and MIME serialization byte for by
 
 const catalog = require("../src/data/catalog.json");
 const { money } = require("../lib/quote-estimate.cjs");
-const expectedQuoteTotal = 47 * 2 * 3 + catalog.template.price;
+const expectedQuoteTotal = 47 * 2 * 3 + catalog.templatePrices["6x14"];
 const validQuote = {
   size: "6x14",
   pattern: "Square-2",
@@ -675,5 +675,23 @@ test("custom quote notes are escaped in HTML and retained in plain text", async 
     assert.ok(mail.text.includes(notes));
     assert.doesNotMatch(mail.html, /<script>/);
     assert.match(mail.html, /&lt;script&gt;/);
+  }
+});
+
+
+test("both emails charge the selected size template once at full price", async () => {
+  for (const [size, price] of Object.entries(catalog.templatePrices)) {
+    const app = setup();
+    const res = response();
+    const total = catalog.ventPrices[size] * 2 * 10 + price;
+    await app.handler({method:"POST", body:{...valid, inquiryType:"quote", postalCode:"83651", quote:{...validQuote,size,quantity:10,displayedTotal:total}}}, res);
+    assert.equal(res.code, 200);
+    assert.equal(app.sent.length, 2);
+    for (const mail of app.sent) {
+      assert.ok(mail.text.includes(`Installation template: Yes ($${price.toFixed(2)})`));
+      assert.ok(mail.html.includes(`Yes ($${price.toFixed(2)})`));
+      assert.ok(mail.text.includes(money(total)));
+    }
+    assert.equal(app.leads[0].quote.serverEstimate,total);
   }
 });
