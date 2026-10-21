@@ -241,6 +241,9 @@ test("confirmation truncates the submitted message, escapes HTML and lists filen
   assert.ok(mail.text.includes(message.slice(0, 2000) + "…"));
   assert.ok(!mail.text.includes(message));
   assert.match(mail.html, /&lt;script&gt;alert/);
+  assert.match(mail.html, /<br>\n<br>\nName:/);
+  assert.match(mail.html, /<br>\nAttachments:/);
+  assert.doesNotMatch(mail.html, /white-space|<script>/);
   assert.match(mail.html, /&amp; &quot;hello&quot; &#39;world&#39;/);
   assert.match(mail.text, /logo.pdf/);
   assert.doesNotMatch(mail.text, /private artwork/);
@@ -456,4 +459,56 @@ test("accepted submissions emit exactly one real lead event even when webhook fa
     console.log = originalLog;
     console.error = originalError;
   }
+});
+
+test("real PDF attachment survives validation and MIME serialization byte for byte", async () => {
+  const fs = require("node:fs");
+  const nodemailer = require("nodemailer");
+  const content = fs.readFileSync(
+    require("node:path").join(__dirname, "fixtures", "delivery-test.pdf"),
+  );
+  const mimeMessages = [];
+  const handler = createHandler({
+    env: environment,
+    leadLogger: async () => {},
+    createTransport() {
+      const transport = nodemailer.createTransport({
+        streamTransport: true,
+        buffer: true,
+        newline: "windows",
+      });
+      return {
+        async sendMail(mail) {
+          const result = await transport.sendMail(mail);
+          mimeMessages.push(result.message.toString());
+        },
+        close() {
+          transport.close();
+        },
+      };
+    },
+  });
+  const res = response();
+  await handler(
+    {
+      method: "POST",
+      body: {
+        ...valid,
+        attachments: [
+          { name: "delivery-test.pdf", content: content.toString("base64") },
+        ],
+      },
+    },
+    res,
+  );
+  assert.equal(res.code, 200);
+  assert.doesNotMatch(mimeMessages[0], /Content-Disposition: attachment/);
+  const attachmentPart = mimeMessages[1].split(
+    "Content-Disposition: attachment; filename=delivery-test.pdf",
+  )[1];
+  assert.ok(attachmentPart);
+  const encoded = attachmentPart.split(/\r?\n\r?\n/)[1].split(/\r?\n--/)[0];
+  const recovered = Buffer.from(encoded.replace(/\s/g, ""), "base64");
+  assert.deepEqual(recovered, content);
+  assert.match(recovered.toString(), /%%EOF/);
 });
