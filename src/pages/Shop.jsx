@@ -1,48 +1,53 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PatternThumbnail from "../components/PatternThumbnail";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { colors, sizes } from "../data/options";
-import { ventPrices as prices } from "../data/pricing";
-const patterns = [
-  "Chevron",
-  "HappyHoliday",
-  "RecPatter-1",
-  "Round-1",
-  "Round-2",
-  "Round-3",
-  "Square-1",
-  "Square-2",
-  "Square-3",
-];
-const patternLabel = (name) =>
-  name === "HappyHoliday"
-    ? "Happy Holiday"
-    : name === "RecPatter-1"
-      ? "Rectangle"
-      : name.replace("-", " ");
-
-const kits = {
-  none: { label: "No installation kit", price: 0, refund: 0 },
-  templateOnly: { label: "Template only", price: 100, refund: 25 },
-  withRouter: { label: "Router + template", price: 250, refund: 225 },
-};
-const money = (value) =>
-  new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
-    value,
-  );
+import catalog from "../data/catalog.json";
+import { estimate, formatQuote, money } from "../data/quoteEstimate";
+import {
+  defaults,
+  parseQuoteParams,
+  quoteParams,
+  readShopWording,
+  saveShopWording,
+} from "../data/quoteParams";
+const patterns = catalog.patterns.map((item) => item.id);
+const patternLabel = (id) =>
+  catalog.patterns.find((item) => item.id === id)?.label;
+const kits = Object.fromEntries(catalog.kits.map((item) => [item.id, item]));
 export default function Shop() {
-  const [size, setSize] = useState("4x8");
-  const [pattern, setPattern] = useState("Chevron");
-  const [custom, setCustom] = useState(false);
-  const [wording, setWording] = useState("");
-  const [finishType, setFinishType] = useState("Painted (standard)");
-  const [color, setColor] = useState(colors[0].name);
-  const [slider, setSlider] = useState(false);
-  const [quantity, setQuantity] = useState(1);
-  const [kit, setKit] = useState("none");
-  const unitPrice = prices[size] * (slider ? 2 : 1);
-  const total = unitPrice * quantity + kits[kit].price;
-  const message = `Please quote this DynamicVent configuration:\nSize: ${size}\nPattern: ${custom ? "Custom wording/design" : patternLabel(pattern)}\nCustom wording: ${custom ? wording.trim() || "To be discussed" : "None"}\nFinish: ${finishType}\nPaint color: ${color}\nShutoff slider: ${slider ? "Yes" : "No"}\nQuantity: ${quantity}\nInstallation kit: ${kits[kit].label}\nEstimated subtotal: ${money(total)} before shipping, tax, powder coating, and custom-design charges.${kits[kit].refund ? `\nKit refund upon return: ${money(kits[kit].refund)}` : ""}`;
+  const [params, setParams] = useSearchParams();
+  // Render defaults on server and first client render, then restore the URL.
+  const [config, setConfig] = useState(defaults);
+  const [wording, setWordingState] = useState("");
+  useEffect(() => {
+    setConfig(parseQuoteParams(params));
+  }, [params]);
+  useEffect(() => {
+    setWordingState(readShopWording());
+  }, []);
+  const update = (change) => {
+    const next = { ...config, ...change };
+    setConfig(next);
+    setParams(quoteParams(next), { replace: true });
+  };
+  const setWording = (value) => {
+    setWordingState(value);
+    saveShopWording(value);
+  };
+  const { size, pattern, custom, finishType, color, slider, quantity, kit } =
+    config;
+  const setSize = (size) => update({ size });
+  const setCustom = (custom) => update({ custom });
+  const setPattern = (pattern) => update({ pattern, custom: false });
+  const setFinishType = (finishType) => update({ finishType });
+  const setColor = (color) => update({ color });
+  const setSlider = (slider) => update({ slider });
+  const setQuantity = (quantity) => update({ quantity: Math.trunc(quantity) });
+  const setKit = (kit) => update({ kit });
+  const { unitPrice, total } = estimate(config);
+  const quote = { ...config, customNotes: wording };
+  const message = `Please quote this DynamicVent configuration:\n${formatQuote(quote)}`;
   return (
     <div className="container section shop-page">
       <div className="page-intro">
@@ -152,7 +157,6 @@ export default function Shop() {
                   aria-pressed={pattern === item}
                   onClick={() => {
                     setPattern(item);
-                    setCustom(false);
                   }}
                 >
                   <PatternThumbnail
@@ -175,8 +179,9 @@ export default function Shop() {
               value={finishType}
               onChange={(event) => setFinishType(event.target.value)}
             >
-              <option>Painted (standard)</option>
-              <option>Powder-coated</option>
+              {catalog.finishTypes.map((finish) => (
+                <option key={finish}>{finish}</option>
+              ))}
             </select>
             <p className="field-help">
               <a className="text-link" href="mailto:sales@dynamicvent.com">
@@ -288,8 +293,13 @@ export default function Shop() {
             </p>
             <Link
               className="button full-width"
-              to="/contact"
-              state={{ message, orderSummary: message, inquiryType: "quote" }}
+              to={`/contact?quote=1&${quoteParams(config)}`}
+              state={{
+                quote,
+                message,
+                orderSummary: message,
+                inquiryType: "quote",
+              }}
             >
               Request a Quote <span aria-hidden="true">↗</span>
             </Link>

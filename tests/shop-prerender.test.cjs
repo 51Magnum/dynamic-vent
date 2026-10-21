@@ -18,7 +18,7 @@ test("built shop is visible and useful before JavaScript or pattern images load"
   assert.equal(document.querySelectorAll(".pattern-options button").length, 9);
   assert.ok(
     document
-      .querySelector('.configuration-summary a[href="/contact"]')
+      .querySelector('.configuration-summary a[href^="/contact?quote=1"]')
       .textContent.includes("Request a Quote"),
   );
   assert.equal(

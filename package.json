@@ -23,7 +23,7 @@
     "build": "react-scripts build && node scripts/generate-page-metadata.cjs",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "test:server": "node --test tests/contact-handler.test.cjs tests/rate-limit.test.cjs tests/lead-log.test.cjs",
+    "test:server": "node --test tests/contact-handler.test.cjs tests/rate-limit.test.cjs tests/lead-log.test.cjs tests/quote-estimate.test.cjs",
     "check:secrets": "node scripts/check-secrets.cjs",
     "test:prerender": "node --test tests/shop-prerender.test.cjs"
   },

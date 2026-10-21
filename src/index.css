@@ -1014,3 +1014,15 @@ select {
 .video-poster > span { position: absolute; inset: 0; display: flex; gap: 14px; align-items: center; justify-content: center; padding: 20px; color: #fff; background: #0005; font-size: clamp(1rem, 3vw, 1.5rem); }
 .video-poster > span > span { display: grid; place-items: center; border: 1px solid #fff; border-radius: 50%; width: 60px; height: 60px; }
 .video-poster:hover > span { background: #0007; }
+
+/* Structured quote details wrap at narrow widths without changing Shop defaults. */
+.quote-details { margin: 0; min-width: 0; }
+.quote-details > div { margin: 0 0 12px; }
+.quote-details dt { font-weight: 600; }
+.quote-details dd { margin: 2px 0 0; overflow-wrap: anywhere; }
+.quote-estimate { margin: 24px 0; overflow-wrap: anywhere; }
+.quote-estimate strong { display: inline-block; margin-left: 12px; }
+.contact-form input, .contact-form textarea, .contact-form select { min-height: 44px; min-width: 0; max-width: 100%; }
+.contact-form .text-link { display: inline-flex; align-items: center; min-height: 44px; }
+.contact-form [aria-invalid="true"] { border-color: #a12e22; outline: 1px solid #a12e22; }
+.contact-form fieldset { min-width: 0; }

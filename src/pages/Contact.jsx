@@ -1,14 +1,20 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import InquiryForm from "../components/InquiryForm";
+import { parseQuoteParams, readShopWording } from "../data/quoteParams";
 export default function Contact() {
   const { state } = useLocation();
+  const [params] = useSearchParams();
+  const quote =
+    params.get("quote") === "1"
+      ? { ...parseQuoteParams(params), customNotes: readShopWording() }
+      : null;
   return (
     <div className="container section contact-grid">
       <div>
         <div className="page-intro">
           <p className="eyebrow">LET’S TALK DETAILS</p>
           <h1>
-            {state?.inquiryType === "quote"
+            {quote || state?.inquiryType === "quote"
               ? "Request your quote."
               : "A better finish starts here."}
           </h1>
@@ -31,6 +37,7 @@ export default function Contact() {
         </div>
       </div>
       <InquiryForm
+        quote={quote}
         initialMessage={state?.orderSummary ? "" : state?.message}
         initialOrderSummary={state?.orderSummary}
         inquiryType={state?.inquiryType}

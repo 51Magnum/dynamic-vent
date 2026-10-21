@@ -512,3 +512,152 @@ test("real PDF attachment survives validation and MIME serialization byte for by
   assert.deepEqual(recovered, content);
   assert.match(recovered.toString(), /%%EOF/);
 });
+
+const validQuote = {
+  size: "6x14",
+  pattern: "Square-2",
+  custom: false,
+  customNotes: "",
+  finishType: "Painted (standard)",
+  color: "Antique Pewter",
+  slider: true,
+  quantity: 3,
+  kit: "withRouter",
+  displayedTotal: 532,
+};
+test("structured quote is recomputed, emailed to both recipients and logged", async () => {
+  const app = setup();
+  const res = response();
+  await app.handler(
+    {
+      method: "POST",
+      body: {
+        ...valid,
+        inquiryType: "quote",
+        sourcePage: "/contact",
+        quote: validQuote,
+        postalCode: "83651",
+        phone: "+1 (208) 555-0100",
+      },
+    },
+    res,
+  );
+  assert.equal(res.code, 200);
+  const internal = app.sent.find((mail) => mail.to === "sales@dynamicvent.com");
+  const confirmation = app.sent.find((mail) => mail.to === valid.email);
+  assert.match(internal.text, /Server estimated subtotal: \$532.00/);
+  assert.match(internal.text, /Displayed estimated subtotal: \$532.00/);
+  assert.match(internal.html, /<table/);
+  assert.match(internal.html, /Square 2/);
+  assert.doesNotMatch(internal.text, /differed from server/);
+  assert.match(
+    confirmation.text,
+    /Estimated subtotal \(shipping and tax TBD\): \$532.00/,
+  );
+  assert.equal(app.leads[0].source, "quote");
+  assert.equal(app.leads[0].quote.serverEstimate, 532);
+  assert.equal(app.leads[0].postalCode, "83651");
+});
+test("tampered displayed totals are flagged without changing the server estimate", async () => {
+  const app = setup();
+  const res = response();
+  await app.handler(
+    {
+      method: "POST",
+      body: {
+        ...valid,
+        inquiryType: "quote",
+        quote: { ...validQuote, displayedTotal: 1 },
+        postalCode: "83651",
+      },
+    },
+    res,
+  );
+  assert.equal(res.code, 200);
+  const mail = app.sent.find((mail) => mail.to === "sales@dynamicvent.com");
+  assert.match(
+    mail.text,
+    /Displayed estimate differed from server estimate; verify before quoting/,
+  );
+  assert.match(mail.text, /Server estimated subtotal: \$532.00/);
+  assert.match(mail.text, /Displayed estimated subtotal: \$1.00/);
+});
+test("invalid quote fields and ZIP are rejected before SMTP", async () => {
+  for (const [field, value] of [
+    ["size", "99x99"],
+    ["size", "__proto__"],
+    ["pattern", "unknown"],
+    ["pattern", "custom"],
+    ["color", "<script>"],
+    ["finishType", "unknown"],
+    ["kit", "unknown"],
+    ["quantity", 1.5],
+    ["quantity", 100],
+    ["quantity", 0],
+    ["quantity", "3"],
+    ["slider", "true"],
+    ["custom", "true"],
+    ["customNotes", "x".repeat(501)],
+    ["displayedTotal", null],
+  ]) {
+    const app = setup();
+    const res = response();
+    await app.handler(
+      {
+        method: "POST",
+        body: {
+          ...valid,
+          inquiryType: "quote",
+          quote: { ...validQuote, [field]: value },
+          postalCode: "83651",
+        },
+      },
+      res,
+    );
+    assert.equal(res.code, 400, field);
+    assert.equal(app.sent.length, 0);
+    assert.ok(res.body.message.includes("valid"));
+  }
+  for (const postalCode of [undefined, "", "12", "<bad>"]) {
+    const app = setup();
+    const res = response();
+    await app.handler(
+      {
+        method: "POST",
+        body: { ...valid, inquiryType: "quote", quote: validQuote, postalCode },
+      },
+      res,
+    );
+    assert.equal(res.code, 400);
+    assert.equal(res.body.field, "postalCode");
+    assert.equal(app.sent.length, 0);
+  }
+});
+test("custom quote notes are escaped in HTML and retained in plain text", async () => {
+  const app = setup();
+  const res = response();
+  const notes = "<script>alert(1)</script>\nWelcome Home";
+  await app.handler(
+    {
+      method: "POST",
+      body: {
+        ...valid,
+        inquiryType: "quote",
+        quote: {
+          ...validQuote,
+          custom: true,
+          pattern: "custom",
+          customNotes: notes,
+        },
+        postalCode: "V6B 1A1",
+      },
+    },
+    res,
+  );
+  assert.equal(res.code, 200);
+  for (const mail of app.sent) {
+    assert.ok(mail.text.includes(notes));
+    assert.doesNotMatch(mail.html, /<script>/);
+    assert.match(mail.html, /&lt;script&gt;/);
+  }
+});

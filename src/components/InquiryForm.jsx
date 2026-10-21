@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { quoteConfirmation, generalConfirmation } from "../data/confirmation";
 import { sizes, colors } from "../data/options";
 import { ventPrices as retailPrices } from "../data/pricing";
+import QuoteInquiryForm from "./QuoteInquiryForm";
 const MAX_BYTES = 2 * 1024 * 1024;
 
 const readFile = (file) =>
@@ -19,13 +20,27 @@ const readFile = (file) =>
   });
 function readDraft(key) {
   try {
-    return JSON.parse(sessionStorage.getItem(key)) || {};
+    const draft = JSON.parse(sessionStorage.getItem(key)) || {};
+    if (draft.structuredQuote)
+      return {
+        name: draft.name || "",
+        email: draft.email || "",
+        message: draft.message || "",
+      };
+    return draft;
   } catch {
     return {};
   }
 }
 
-export default function InquiryForm({
+export default function InquiryForm(props) {
+  return props.quote && !props.trade ? (
+    <QuoteInquiryForm quote={props.quote} />
+  ) : (
+    <LegacyInquiryForm {...props} />
+  );
+}
+function LegacyInquiryForm({
   initialMessage = "",
   initialOrderSummary = "",
   inquiryType = "general",

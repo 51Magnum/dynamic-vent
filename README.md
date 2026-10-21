@@ -183,3 +183,34 @@ Preview mailbox credentials for owner-authorized delivery checks. Never delibera
 change Production credentials to test failures. Exercise general/trade submissions,
 artwork-only-on-internal, a filled honeypot, six submissions, and runtime lead
 flags. Simulate SMTP failures in unit tests, or only in an isolated Preview.
+
+## Shareable configured quotes
+
+`src/data/catalog.json` is the single size/pattern/color/finish/kit/price catalog.
+`options.js` and `pricing.js` retain their existing public exports. The pure estimate
+implementation lives in `src/data/quote-estimate.js` (CommonJS in a `.js` file so
+CRA bundles it as executable code), re-exported by `lib/quote-estimate.cjs` and
+`src/data/quoteEstimate.js`. Standard prices and kit refunds are unchanged.
+
+Shop URL selections are parsed against the catalog and quantities clamped to
+1–99. The initial Shop render uses defaults to match prerendered HTML, then a
+mount effect applies URL values. The CTA goes to `/contact?quote=1&…`; direct
+loads and refreshes use the same shared parser. Custom wording stays in tab-local
+sessionStorage (`dynamicvent-shop-wording`), never in the URL. A shared URL cannot
+transfer personal wording; the customer can add it in the quote form.
+
+The quote form retains typed details under `dynamicvent-inquiry`, updates quantity
+and estimate in the URL, and collects optional phone plus required delivery ZIP.
+`/api/contact` remains the only endpoint. Retail quotes require a catalog-valid
+structured `quote` plus ZIP, and the server recomputes prices before sending mail.
+The internal configuration table shows server and displayed estimates, flagging
+any difference over one cent. The lead and customer confirmation contain the
+validated configuration. General and Trade inquiries retain their existing flow.
+No payment is collected and all subtotals exclude shipping, tax, powder coating
+and custom-design charges. Success and error focus are managed for keyboard users.
+
+Browser verification covers the production build with a saved non-default Shop
+URL (including its $532 example), clean hydration console, refresh/Back/direct
+quote links, custom wording, and a 320px layout without horizontal overflow.
+Live delivery verification uses an owner-authorized Preview submission before
+merging; unit tests otherwise mock SMTP and send no mail.
