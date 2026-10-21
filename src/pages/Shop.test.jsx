@@ -38,7 +38,7 @@ test("adds the purchased template once alongside slider and vent quantity", () =
     ),
   ).toBeInTheDocument();
   expect(
-    screen.getByText(money(47 * 2 * 3 + catalog.templatePrices["6x14"])),
+    screen.getByText(money(catalog.ventPrices["6x14"] * 2 * 3 + catalog.templatePrices["6x14"])),
   ).toBeInTheDocument();
   expect(screen.queryByLabelText(/Installation kit/)).not.toBeInTheDocument();
   expect(
@@ -54,7 +54,7 @@ test("adds the purchased template once alongside slider and vent quantity", () =
   expect(inquiry).toHaveTextContent("Shutoff slider: Yes");
   expect(inquiry).toHaveTextContent("Quantity: 3");
   expect(inquiry).toHaveTextContent(
-    `Estimated subtotal: ${money(47 * 2 * 3 + catalog.templatePrices["6x14"])}`,
+    `Estimated subtotal: ${money(catalog.ventPrices["6x14"] * 2 * 3 + catalog.templatePrices["6x14"])}`,
   );
   expect(inquiry).toHaveTextContent("Installation template: Yes");
   expect(inquiry).not.toHaveTextContent(/kit|refund/i);
@@ -91,7 +91,7 @@ test("custom wording and powder coating reach the quote inquiry without an inven
   expect(inquiry).toHaveTextContent("Custom wording: Welcome Home");
   expect(inquiry).toHaveTextContent("Finish: Powder-coated");
   expect(inquiry).toHaveTextContent(
-    "Estimated subtotal: $20.00 before shipping, tax, powder coating, and custom-design charges.",
+    `Estimated subtotal: ${money(catalog.ventPrices["4x8"])} before shipping, tax, powder coating, and custom-design charges.`,
   );
 });
 

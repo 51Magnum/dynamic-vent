@@ -102,3 +102,35 @@ test("approved template map stays size-specific in quote text and email rows", (
     assert.deepEqual(quoteRows(quote).find(([label]) => label === "Installation template"), ["Installation template", `Yes ($${price.toFixed(2)})`]);
   }
 });
+
+
+test("retail vent prices match the approved catalog", () => {
+  assert.deepEqual(catalog.ventPrices, { "4x8":42, "4x10":47, "4x12":54, "4x14":59, "6x10":62, "6x12":67, "6x14":74 });
+});
+test("trade tiers apply to vents before the slider multiplier", () => {
+  const {ventPricing} = require("../lib/quote-estimate.cjs");
+  for (const [quantity,percent] of [[1,0],[9,0],[10,10],[24,10],[25,15],[49,15],[50,20],[99,20],[100,25],[1000,25]]) {
+    for (const size of catalog.sizes.map(item=>item.label)) {
+      const base = Math.round(catalog.ventPrices[size]*(100-percent))/100;
+      for (const slider of [false,true]) {
+        const result = ventPricing({size,quantity,slider,trade:true});
+        assert.equal(result.discountPercent, percent);
+        assert.equal(result.unitPrice,base*(slider?2:1));
+        assert.equal(result.ventsSubtotal,Math.round(result.unitPrice*quantity*100)/100);
+      }
+    }
+  }
+});
+
+
+test("trade templates remain full price at every tier and retail totals stay undiscounted", () => {
+  for (const quantity of [10,25,50,100]) {
+    for (const size of catalog.sizes.map(item=>item.label)) {
+      const config={size,quantity,slider:true,template:true};
+      const trade=estimate({...config,trade:true});
+      assert.equal(trade.templatePrice,catalog.templatePrices[size]);
+      assert.equal(trade.total,trade.ventsSubtotal+catalog.templatePrices[size]);
+      if(quantity<100) assert.equal(estimate(config).unitPrice,catalog.ventPrices[size]*2);
+    }
+  }
+});

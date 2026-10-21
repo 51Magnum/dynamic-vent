@@ -515,7 +515,7 @@ test("real PDF attachment survives validation and MIME serialization byte for by
 
 const catalog = require("../src/data/catalog.json");
 const { money } = require("../lib/quote-estimate.cjs");
-const expectedQuoteTotal = 47 * 2 * 3 + catalog.templatePrices["6x14"];
+const expectedQuoteTotal = catalog.ventPrices["6x14"] * 2 * 3 + catalog.templatePrices["6x14"];
 const validQuote = {
   size: "6x14",
   pattern: "Square-2",
@@ -694,4 +694,34 @@ test("both emails charge the selected size template once at full price", async (
     }
     assert.equal(app.leads[0].quote.serverEstimate,total);
   }
+});
+
+
+test("Trade emails use server-calculated tiers and discounted slider prices", async () => {
+  for (const [quantity, percent] of [[9,0],[10,10],[25,15],[50,20],[100,25]]) {
+    for (const slider of [false,true]) {
+      const app = setup();
+      const res = response();
+      await app.handler({method:"POST",body:{...valid,inquiryType:"trade",tradePricing:{size:"4x8",quantity,slider,discountPercent:99,displayedTotal:1}}},res);
+      assert.equal(res.code,200);
+      const total = Math.round(catalog.ventPrices["4x8"]*(100-percent))/100*(slider?2:1)*quantity;
+      for (const mail of app.sent) {
+        assert.ok(mail.text.includes(`Trade discount (vents only): ${percent}%`));
+        assert.ok(mail.text.includes(`Estimated standard-vent total: ${money(total)}`));
+        assert.ok(mail.text.includes("Templates are not discounted."));
+      }
+    }
+  }
+});
+test("invalid trade pricing is rejected and retail quotes cannot claim a trade tier", async () => {
+  for (const change of [{size:"__proto__"},{quantity:0},{quantity:10001},{quantity:"25"},{slider:"true"}]) {
+    const app=setup(),res=response();
+    await app.handler({method:"POST",body:{...valid,inquiryType:"trade",tradePricing:{size:"4x8",quantity:25,slider:false,...change}}},res);
+    assert.equal(res.code,400);
+    assert.equal(app.sent.length,0);
+  }
+  const app=setup(),res=response();
+  await app.handler({method:"POST",body:{...valid,inquiryType:"quote",postalCode:"83651",quote:{...validQuote,quantity:25,trade:true,displayedTotal:catalog.ventPrices["6x14"]*2*25+catalog.templatePrices["6x14"]}}},res);
+  assert.equal(res.code,200);
+  assert.equal(app.leads[0].quote.serverEstimate,catalog.ventPrices["6x14"]*2*25+catalog.templatePrices["6x14"]);
 });

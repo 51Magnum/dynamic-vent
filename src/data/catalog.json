@@ -96,14 +96,20 @@
   ],
   "finishTypes": ["Painted (standard)", "Powder-coated"],
   "ventPrices": {
-    "4x8": 20,
-    "4x10": 23,
-    "4x12": 30,
-    "4x14": 34,
-    "6x10": 35,
-    "6x12": 40,
-    "6x14": 47
+    "4x8": 42,
+    "4x10": 47,
+    "4x12": 54,
+    "4x14": 59,
+    "6x10": 62,
+    "6x12": 67,
+    "6x14": 74
   },
+  "tradeDiscounts": [
+    { "minimumQuantity": 10, "percent": 10 },
+    { "minimumQuantity": 25, "percent": 15 },
+    { "minimumQuantity": 50, "percent": 20 },
+    { "minimumQuantity": 100, "percent": 25 }
+  ],
   "templatePrices": {
     "4x8": 45,
     "4x10": 49,

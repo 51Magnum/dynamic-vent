@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { quoteConfirmation, generalConfirmation } from "../data/confirmation";
 import { sizes, colors } from "../data/options";
 import { ventPrices as retailPrices } from "../data/pricing";
+import { money, ventPricing } from "../data/quoteEstimate";
 import QuoteInquiryForm from "./QuoteInquiryForm";
 const MAX_BYTES = 2 * 1024 * 1024;
 
@@ -54,6 +55,7 @@ function LegacyInquiryForm({
     company: "",
     role: "Builder",
     quantity: "10",
+    slider: false,
     size: "4x8",
     finish: "Not decided",
     finishType: "Painted (standard)",
@@ -78,7 +80,8 @@ function LegacyInquiryForm({
   const [website, setWebsite] = useState("");
   const kind = trade ? "trade" : form.inquiryType || inquiryType;
   const update = (event) => {
-    const next = { ...form, [event.target.name]: event.target.value };
+    const { name, type, checked, value } = event.target;
+    const next = { ...form, [name]: type === "checkbox" ? checked : value };
     setForm(next);
     try {
       sessionStorage.setItem(draftKey, JSON.stringify(next));
@@ -86,6 +89,11 @@ function LegacyInquiryForm({
       /* Form remains usable without storage. */
     }
   };
+  const tradeQuantity = Number(form.quantity);
+  const tradePricing = trade && Object.hasOwn(retailPrices, form.size) &&
+    Number.isInteger(tradeQuantity) && tradeQuantity >= 1 && tradeQuantity <= 10000
+      ? ventPricing({ size: form.size, quantity: tradeQuantity, slider: form.slider, trade: true })
+      : null;
   const submit = async (event) => {
     event.preventDefault();
     if (loading) return;
@@ -116,6 +124,9 @@ function LegacyInquiryForm({
           email: form.email,
           message,
           inquiryType: kind,
+          ...(trade ? {
+            tradePricing: { size: form.size, quantity: tradeQuantity, slider: form.slider },
+          } : {}),
           sourcePage: window.location.pathname,
           website,
           attachments: await Promise.all(files.map(readFile)),
@@ -271,18 +282,22 @@ function LegacyInquiryForm({
                 </select>
               </div>
             </div>
-            <p className="field-help">
-              Standard vents: ${retailPrices[form.size].toFixed(2)} per vent.
-              Estimated standard-vent total for{" "}
-              {Number(form.quantity || 0).toLocaleString("en-US")} vents: $
-              {(
-                retailPrices[form.size] * Number(form.quantity || 0)
-              ).toLocaleString("en-US", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
-              . Before sliders, customization, powder coating, shipping, and
-              tax. Request a project quote for volume pricing.
+            <label className="check-option">
+              <input
+                type="checkbox" name="slider" checked={form.slider} onChange={update}
+              />
+              <span>
+                Add a shutoff slider
+                <small>Doubles the vent price after the trade discount.</small>
+              </span>
+            </label>
+            <p className="field-help" aria-live="polite">
+              Standard vents: {money(retailPrices[form.size])} retail per vent.
+              {tradePricing && <> Trade discount (vents only): {tradePricing.discountPercent}%.
+                Vent unit price after discount{form.slider ? " and slider" : ""}: {money(tradePricing.unitPrice)}.
+                Estimated standard-vent total for {Number(form.quantity).toLocaleString("en-US")} vents: {money(tradePricing.ventsSubtotal)}.
+              </>}
+              {" "}Before templates, customization, powder coating, shipping, and tax. Templates are not discounted. Final pricing confirmed in your quote.
             </p>
             <label className="form-label" htmlFor="trade-finish">
               Finish

@@ -194,7 +194,7 @@ flags. Simulate SMTP failures in unit tests, or only in an isolated Preview.
 `options.js` and `pricing.js` retain their existing public exports. The pure estimate
 implementation lives in `src/data/quote-estimate.js` (CommonJS in a `.js` file so
 CRA bundles it as executable code), re-exported by `lib/quote-estimate.cjs` and
-`src/data/quoteEstimate.js`. Vent prices and the slider multiplier are unchanged. Template sets are size-specific, purchased once per configured size; `templatePrices` next to `ventPrices` holds their final prices. Template charges are separate from vent quantities and are never discounted.
+`src/data/quoteEstimate.js`. `ventPrices` holds the retail prices. `tradeDiscounts` holds the quantity tiers, applied only to Trade page inquiries; Shop quotes stay at retail. Sliders double the vent price after any trade discount. Template sets are size-specific, purchased once per configured size; `templatePrices` next to `ventPrices` holds their final prices. Template charges are separate from vent quantities and are never discounted.
 
 Shop URL selections are parsed against the catalog and quantities clamped to
 1–99. The initial Shop render uses defaults to match prerendered HTML, then a

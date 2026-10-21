@@ -61,13 +61,13 @@ test("direct quote URL shows the configuration, changes estimate and preserves s
   expect(details).toHaveTextContent("Square 2");
   expect(
     screen.getByRole("region", { name: "Quote estimate" }),
-  ).toHaveTextContent(money(47 * 2 * 3 + catalog.templatePrices["6x14"]));
+  ).toHaveTextContent(money(catalog.ventPrices["6x14"] * 2 * 3 + catalog.templatePrices["6x14"]));
   fireEvent.change(screen.getByLabelText("Quantity"), {
     target: { value: "5" },
   });
   expect(
     screen.getByRole("region", { name: "Quote estimate" }),
-  ).toHaveTextContent(money(47 * 2 * 5 + catalog.templatePrices["6x14"]));
+  ).toHaveTextContent(money(catalog.ventPrices["6x14"] * 2 * 5 + catalog.templatePrices["6x14"]));
   expect(screen.getByTestId("location")).toHaveTextContent("qty=5");
   fireEvent.click(screen.getByRole("link", { name: "Edit selections" }));
   expect(await screen.findByLabelText("Number of vents")).toHaveValue(5);
@@ -76,7 +76,7 @@ test("direct quote URL shows the configuration, changes estimate and preserves s
     "true",
   );
   expect(
-    screen.getByText(money(47 * 2 * 5 + catalog.templatePrices["6x14"])),
+    screen.getByText(money(catalog.ventPrices["6x14"] * 2 * 5 + catalog.templatePrices["6x14"])),
   ).toBeInTheDocument();
 });
 test("ZIP validation focuses its field and structured submission shows a focused confirmation", async () => {
@@ -116,7 +116,7 @@ test("ZIP validation focuses its field and structured submission shows a focused
     quote: {
       size: "6x14",
       quantity: 3,
-      displayedTotal: 47 * 2 * 3 + catalog.templatePrices["6x14"],
+      displayedTotal: catalog.ventPrices["6x14"] * 2 * 3 + catalog.templatePrices["6x14"],
     },
   });
   expect(payload.message).toContain("Please advise.");
